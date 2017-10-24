@@ -1,0 +1,13 @@
+﻿  Core.cpp
+  Mesh.cpp
+  Shader.cpp
+  Texture.cpp
+  Window.cpp
+  PAG.cpp
+  Generating code
+  30 of 49 functions (61.2%) were compiled, the rest were copied from previous compilation.
+    14 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  PAG.vcxproj -> C:\Users\20400\source\repos\PAG\Release\PAG.exe
+  PAG.vcxproj -> C:\Users\20400\source\repos\PAG\Release\PAG.pdb (Full PDB)
