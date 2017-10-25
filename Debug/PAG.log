@@ -1,12 +1,5 @@
-﻿  stdafx.cpp
-  Window.cpp
-  Texture.cpp
+﻿  Skipping... (no relevant changes detected)
   Shader.cpp
-  Mesh.cpp
-  Core.cpp
-  Generating Code...
-  glad.c
   PAG.cpp
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.exe
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.pdb (Partial PDB)
