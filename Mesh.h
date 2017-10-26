@@ -7,6 +7,6 @@ class Mesh
 public:
 	Mesh();
 	~Mesh();
-	int loadContent(int, GLuint);
+	int loadContent(int);
 };
 

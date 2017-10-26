@@ -6,7 +6,7 @@ class Core
 public:
 	Core(Window*);
 	~Core();
-	void update();
+	void update(GLuint);
 
 private:
 	void render(float);

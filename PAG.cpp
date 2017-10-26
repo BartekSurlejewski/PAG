@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -9,53 +11,38 @@
 #include "Mesh.h"
 #include "Core.h"
 #include "Shader.h"
-
-#define STB_IMAGE_IMPLEMENTATION
+#include "Texture.h"
+#include "stb_image.h"
 
 const int SCR_WIDTH = 640;
 const int SCR_HEIGHT = 480;
-
-GLuint VBO = NULL;
-
-void initShader()
-{
-	Shader shader;
-
-	/*Shader init*/
-	GLuint programHandle = glCreateProgram();
-
-	if (programHandle == 0)
-	{
-		std::cout << "Error creating program object" << std::endl;
-	}
-
-	shader.loadAndCompileShaderFromFile(GL_VERTEX_SHADER, "Shaders/basic.vert", programHandle);
-	shader.loadAndCompileShaderFromFile(GL_FRAGMENT_SHADER, "Shaders/basic.frag", programHandle);
-
-	glLinkProgram(programHandle);
-
-	glUseProgram(programHandle);
-}
+const std::string texturePath = "texture.jpg";
 
 int main()
 {
 	Window* screen = new Window();
 	Mesh mesh;
 	Core core(screen);
+	Texture texture;
+	
 
 	if (!screen->init(SCR_WIDTH, SCR_HEIGHT)) 
 	{
 		return -1;
 	}
 
-	if (!mesh.loadContent(1, VBO))
+	if (!mesh.loadContent(1))
 	{
 		return -1;
 	}
-	
-	initShader();
 
-	core.update();
+	GLuint programHandle = glCreateProgram();
+
+	texture.loadTexture(texturePath);
+
+	Shader shader(programHandle, "Shaders/basic.vert", "Shaders/basic.frag");
+
+	core.update(programHandle);
 
 	glfwTerminate();
 	return 0;

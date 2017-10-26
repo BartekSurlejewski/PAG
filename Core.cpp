@@ -22,13 +22,13 @@ void Core::processInput(GLFWwindow *window)
 
 void Core::render(float tpf)
 {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void Core::update()
+void Core::update(GLuint programHandle)
 {
 	float oldTime = 0.0f;
 	float newTime = 0.0f;
@@ -43,6 +43,11 @@ void Core::update()
 		gameTime = newTime - oldTime;
 
 		processInput(window);
+
+		float timeValue = glfwGetTime();
+		float greenValue = sin(timeValue) / 2.0f + 0.5f;
+		int vertexColorLocation = glGetUniformLocation(programHandle, "ourColor");
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
 		render(gameTime);
 

@@ -3,12 +3,29 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
 #include <string>
 #include <fstream>
 
 
-Shader::Shader()
+Shader::Shader(GLuint programHandle, std::string vertexShader, std::string fragmentShader)
 {
+	if (programHandle == 0)
+	{
+		std::cout << "Error creating program object" << std::endl;
+	}
+
+	loadAndCompileShaderFromFile(GL_VERTEX_SHADER, vertexShader, programHandle);
+	loadAndCompileShaderFromFile(GL_FRAGMENT_SHADER, fragmentShader, programHandle);
+	glLinkProgram(programHandle);
+
+	/*GLfloat timeValue = glfwGetTime();
+	GLfloat greenValue = (sin(timeValue) / 2.0) + 0.5;*/
+	GLint vertexColorLocation = glGetUniformLocation(programHandle, "ourColor");
+
+	glUseProgram(programHandle);
+
+	//glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 }
 
 
