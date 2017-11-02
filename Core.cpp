@@ -9,7 +9,6 @@ Core::Core(Window* window)
 	screen = window;
 }
 
-
 Core::~Core()
 {
 }
@@ -20,36 +19,28 @@ void Core::processInput(GLFWwindow *window)
 		glfwSetWindowShouldClose(window, true);
 }
 
-void Core::render(float tpf)
+void Core::render(Shader shader, Texture texture)
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void Core::update(GLuint programHandle)
+void Core::update(GLuint programHandle, Shader shader, Texture texture, Transform transform, Camera camera)
 {
-	float oldTime = 0.0f;
-	float newTime = 0.0f;
-	float gameTime = 0.0f;
-
 	GLFWwindow* window = screen->getWindow();
 
 	while (!glfwWindowShouldClose(window))
 	{
-		oldTime = newTime;
-		newTime = (float)glfwGetTime();
-		gameTime = newTime - oldTime;
-
 		processInput(window);
 
-		float timeValue = glfwGetTime();
-		float greenValue = sin(timeValue) / 2.0f + 0.5f;
 		int vertexColorLocation = glGetUniformLocation(programHandle, "ourColor");
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
-		render(gameTime);
+		camera.init(programHandle, screen);
+		transform.move(programHandle);
+
+		render(shader, texture);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

@@ -8,9 +8,11 @@ class Shader
 public:
 	Shader(GLuint, std::string, std::string);
 	~Shader();
+	void active();
 
 private:
 	std::string loadShader(std::string);
 	void loadAndCompileShaderFromFile(GLint, std::string, GLuint&);
+	GLuint shaderObject;
 };
 

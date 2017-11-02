@@ -1,4 +1,8 @@
 #include "Window.h"
+#include "Shader.h"
+#include "Texture.h"
+#include "Transform.h"
+#include "Camera.h"
 
 #pragma once
 class Core
@@ -6,13 +10,12 @@ class Core
 public:
 	Core(Window*);
 	~Core();
-	void update(GLuint);
+	void update(GLuint, Shader, Texture, Transform, Camera);
 
 private:
-	void render(float);
+	void render(Shader, Texture);
 	void processInput(GLFWwindow*);
 
 	Window* screen;
-
 };
 

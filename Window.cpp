@@ -2,6 +2,7 @@
 #include "Window.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm\gtx\transform.hpp>
 #include <iostream>
 
 Window::Window()
@@ -41,7 +42,6 @@ int Window::init(int width, int height)
 	}
 
 	glViewport(0, 0, width, height);
-	//glViewport(width/4, height/4, width/2, height/2);
 
 	return true;
 }

@@ -19,13 +19,7 @@ Shader::Shader(GLuint programHandle, std::string vertexShader, std::string fragm
 	loadAndCompileShaderFromFile(GL_FRAGMENT_SHADER, fragmentShader, programHandle);
 	glLinkProgram(programHandle);
 
-	/*GLfloat timeValue = glfwGetTime();
-	GLfloat greenValue = (sin(timeValue) / 2.0) + 0.5;*/
-	GLint vertexColorLocation = glGetUniformLocation(programHandle, "ourColor");
-
 	glUseProgram(programHandle);
-
-	//glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 }
 
 
@@ -62,7 +56,7 @@ std::string Shader::loadShader(std::string fileName)
 
 void Shader::loadAndCompileShaderFromFile(GLint shaderType, std::string fileName, GLuint& programHandle)
 {
-	GLuint shaderObject = glCreateShader(shaderType);
+	shaderObject = glCreateShader(shaderType);
 
 	if (shaderObject == 0) 
 	{

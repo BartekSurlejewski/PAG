@@ -19,9 +19,8 @@ Texture::~Texture()
 void Texture::loadTexture(std::string texturePath)
 {
 	int width, height, nrChannels;
-	GLuint texture;
+	GLuint texture = NULL;
 
-	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -29,6 +28,7 @@ void Texture::loadTexture(std::string texturePath)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
 	
 	if (data)
