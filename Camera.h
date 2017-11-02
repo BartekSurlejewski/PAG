@@ -8,12 +8,15 @@
 class Camera
 {
 public:
-	Camera();
+	Camera(GLuint, Window*);
 	~Camera();
-	void init(GLuint, Window*);
+	void update(GLuint, Window*, GLfloat);
+	void moveCamera(int);
 
 private:
 	int height, width;
+	GLfloat deltaTime;
 	glm::mat4 view, projection;
+	glm::vec3 cameraPos, cameraFront, cameraUp;
 };
 

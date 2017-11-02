@@ -8,14 +8,15 @@
 class Core
 {
 public:
-	Core(Window*);
+	Core(Window*, Camera*);
 	~Core();
-	void update(GLuint, Shader, Texture, Transform, Camera);
+	void update(GLuint, Shader, Texture, Transform);
 
 private:
 	void render(Shader, Texture);
 	void processInput(GLFWwindow*);
 
 	Window* screen;
+	Camera* camera;
 };
 
