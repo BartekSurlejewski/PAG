@@ -5,6 +5,7 @@
 #include <glad\glad.h>
 #include <glm\gtx\transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
+#include "Mesh.h"
 
 #pragma once
 class Transform
@@ -12,7 +13,7 @@ class Transform
 public:
 	Transform();
 	~Transform();
-	void move(GLuint);
+	void move(GLuint, int);
 
 private:
 	glm::mat4 model;

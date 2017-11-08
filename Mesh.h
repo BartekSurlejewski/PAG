@@ -5,5 +5,6 @@ public:
 	Mesh();
 	~Mesh();
 	int loadContent(int);
+	static glm::vec3 cubePositions[];
 };
 

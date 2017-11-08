@@ -25,9 +25,9 @@ void Camera::update(GLuint programHandle, Window* window, GLfloat deltaTime)
 	/*View matrix*/
 	this->deltaTime = deltaTime;
 	view = glm::mat4(1.0f);
-	view = glm::lookAt(	cameraPos,  // camera position in world space
-						cameraPos + cameraFront,  // at this point camera is looking
-						cameraUp); // head is up
+	view = glm::lookAt(	cameraPos,					// camera position in world space
+						cameraPos + cameraFront,	// at this point camera is looking
+						cameraUp);					// head is up
 
 	GLuint viewLoc = glGetUniformLocation(programHandle, "view");
 	GLuint projectionLoc = glGetUniformLocation(programHandle, "projection");

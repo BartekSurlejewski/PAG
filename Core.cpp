@@ -29,14 +29,6 @@ void Core::processInput(GLFWwindow *window)
 		camera->moveCamera(GLFW_KEY_D);
 }
 
-void Core::render(Shader shader, Texture texture)
-{
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-}
-
 void Core::update(GLuint programHandle, Shader shader, Texture texture, Transform transform)
 {
 	GLFWwindow* window = screen->getWindow();
@@ -45,6 +37,9 @@ void Core::update(GLuint programHandle, Shader shader, Texture texture, Transfor
 
 	while (!glfwWindowShouldClose(window))
 	{
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -52,9 +47,11 @@ void Core::update(GLuint programHandle, Shader shader, Texture texture, Transfor
 		processInput(window);
 		camera->update(programHandle, screen, deltaTime);
 
-		transform.move(programHandle);
-
-		render(shader, texture);
+		for (int i = 0; i < 10; i++)
+		{
+			transform.move(programHandle, i);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

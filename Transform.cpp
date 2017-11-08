@@ -11,9 +11,10 @@ Transform::~Transform()
 {
 }
 
-void Transform::move(GLuint programHandle)
+void Transform::move(GLuint programHandle, int objectNumber)
 {
 	model = glm::mat4(1.0f);
+	model = glm::translate(model, Mesh::cubePositions[objectNumber]);
 	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 	GLuint modelLoc = glGetUniformLocation(programHandle, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
