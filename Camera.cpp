@@ -36,7 +36,7 @@ void Camera::update(GLuint programHandle, Window* window, GLfloat deltaTime)
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
-void Camera::moveCamera(int key)
+void Camera::processKeyboard(int key)
 {
 	float cameraSpeed = 4.0f * deltaTime;
 

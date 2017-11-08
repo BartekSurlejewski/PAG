@@ -11,7 +11,7 @@ public:
 	Camera(GLuint, Window*);
 	~Camera();
 	void update(GLuint, Window*, GLfloat);
-	void moveCamera(int);
+	void processKeyboard(int);
 
 private:
 	int height, width;
