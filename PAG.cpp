@@ -19,7 +19,9 @@
 
 const int SCR_WIDTH = 1000;
 const int SCR_HEIGHT = 640;
-const std::string texturePath = "Brickwall_texture.jpg";
+const std::string texturePath_Brick = "Brickwall_texture.jpg";
+const std::string texturePath_Earth = "Earth.jpg";
+const std::string texturePath_moon = "moon.jpg";
 
 int main()
 {
@@ -42,11 +44,8 @@ int main()
 	Camera* camera= new Camera(programHandle, window);
 	Core core(window, camera);
 
-	texture.loadTexture(texturePath);
-
 	Shader shader(programHandle, "Shaders/basic.vert", "Shaders/basic.frag");
-
-	core.update(programHandle, shader, texture, transform);
+	core.update(programHandle, texture, transform);
 
 	glfwTerminate();
 	return 0;

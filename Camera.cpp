@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Camera.h"
 
-
 Camera::Camera(GLuint programHandle, Window* window)
 {
 	cameraPos = glm::vec3(1.5f, 0.0f, 3.0f);
@@ -14,7 +13,6 @@ Camera::Camera(GLuint programHandle, Window* window)
 	projection = glm::mat4(1.0f);
 	projection = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 100.0f);
 }
-
 
 Camera::~Camera()
 {
@@ -38,22 +36,51 @@ void Camera::update(GLuint programHandle, Window* window, GLfloat deltaTime)
 
 void Camera::processKeyboard(int key)
 {
-	float cameraSpeed = 4.0f * deltaTime;
+	GLfloat velocity = movementSpeed * deltaTime;
 
 	if (key == GLFW_KEY_W)
 	{
-		cameraPos += cameraSpeed * cameraFront;
+		cameraPos += velocity * cameraFront;
 	}
 	else if (key == GLFW_KEY_S)
 	{
-		cameraPos -= cameraSpeed * cameraFront;
+		cameraPos -= velocity * cameraFront;
 	}
 	else if (key == GLFW_KEY_A)
 	{
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *  cameraSpeed;
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *  velocity;
 	}
 	else if (key == GLFW_KEY_D)
 	{
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *  cameraSpeed;
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *  velocity;
 	}
 }
+
+void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
+{
+	xoffset *= mouseSensitivity;
+	yoffset *= mouseSensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (constrainPitch)
+	{
+		if (pitch > 89.0f)
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+	}
+
+	updateVectors();
+}
+
+void Camera::updateVectors()
+{
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
+}
+

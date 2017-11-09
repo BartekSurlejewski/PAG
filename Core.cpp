@@ -2,7 +2,14 @@
 #include "Core.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <string>
 #include <iostream>
+
+std::string textures[] = {
+						"Brickwall_texture.jpg",
+						"someTexture.jpg",
+						"images.jpg"
+};
 
 Core::Core(Window* window, Camera* camera)
 {
@@ -27,9 +34,12 @@ void Core::processInput(GLFWwindow *window)
 		camera->processKeyboard(GLFW_KEY_A);
 	else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera->processKeyboard(GLFW_KEY_D);
+
+	glfwGetCursorPos(window, &xpos, &ypos);
+	processMouseMovement();
 }
 
-void Core::update(GLuint programHandle, Shader shader, Texture texture, Transform transform)
+void Core::update(GLuint programHandle, Texture texture, Transform transform)
 {
 	GLFWwindow* window = screen->getWindow();
 	GLfloat deltaTime = 0.0f;
@@ -46,11 +56,9 @@ void Core::update(GLuint programHandle, Shader shader, Texture texture, Transfor
 
 		processInput(window);
 		camera->update(programHandle, screen, deltaTime);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		for (int i = 0; i < 10; i++)
 		{
+			texture.loadTexture(textures[i % 3]);
 			transform.move(programHandle, i);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
@@ -58,4 +66,14 @@ void Core::update(GLuint programHandle, Shader shader, Texture texture, Transfor
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+}
+
+void Core::processMouseMovement()
+{
+	GLfloat xoffset = xpos - lastX;
+	GLfloat yoffset = lastY - ypos;
+
+	lastX = xpos;
+	lastY = ypos;
+	camera->processMouseMovement(xoffset, yoffset, true);
 }

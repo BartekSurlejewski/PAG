@@ -12,11 +12,19 @@ public:
 	~Camera();
 	void update(GLuint, Window*, GLfloat);
 	void processKeyboard(int);
+	void processMouseMovement(float, float, GLboolean);
 
 private:
 	int height, width;
-	GLfloat deltaTime;
 	glm::mat4 view, projection;
 	glm::vec3 cameraPos, cameraFront, cameraUp;
+
+	GLfloat deltaTime;
+	GLfloat yaw = -90.0f;
+	GLfloat pitch = 0.0f;
+	GLfloat movementSpeed = 4.0f;
+	GLfloat mouseSensitivity = 0.1f;
+
+	void updateVectors();
 };
 

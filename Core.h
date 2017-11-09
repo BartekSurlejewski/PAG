@@ -10,12 +10,14 @@ class Core
 public:
 	Core(Window*, Camera*);
 	~Core();
-	void update(GLuint, Shader, Texture, Transform);
+	void update(GLuint, Texture, Transform);
 
 private:
-	void render(Shader, Texture);
 	void processInput(GLFWwindow*);
+	void processMouseMovement();
 
+	GLdouble xpos, ypos;
+	GLfloat lastX = 500, lastY = 320;
 	Window* screen;
 	Camera* camera;
 };
