@@ -10,7 +10,7 @@ class Core
 public:
 	Core(Window*, Camera*);
 	~Core();
-	void update(GLuint, Texture, Transform);
+	void update(GLuint, Texture[], Transform*);
 
 private:
 	void processInput(GLFWwindow*);

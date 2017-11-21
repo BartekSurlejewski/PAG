@@ -1,13 +1,12 @@
 ﻿  Core.cpp
-  Mesh.cpp
-  Shader.cpp
-  Texture.cpp
-  Window.cpp
+Core.cpp(53): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+Core.cpp(73): warning C4244: 'initializing': conversion from 'GLdouble' to 'GLfloat', possible loss of data
+Core.cpp(74): warning C4244: 'initializing': conversion from 'GLdouble' to 'GLfloat', possible loss of data
+Core.cpp(76): warning C4244: '=': conversion from 'GLdouble' to 'GLfloat', possible loss of data
+Core.cpp(77): warning C4244: '=': conversion from 'GLdouble' to 'GLfloat', possible loss of data
   PAG.cpp
   Generating code
-  30 of 49 functions (61.2%) were compiled, the rest were copied from previous compilation.
-    14 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+  All 442 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
-  PAG.vcxproj -> C:\Users\20400\source\repos\PAG\Release\PAG.exe
-  PAG.vcxproj -> C:\Users\20400\source\repos\PAG\Release\PAG.pdb (Full PDB)
+  PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Release\PAG.exe
+  PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Release\PAG.pdb (Full PDB)

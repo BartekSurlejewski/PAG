@@ -20,32 +20,29 @@
 const int SCR_WIDTH = 1000;
 const int SCR_HEIGHT = 640;
 const std::string texturePath_Brick = "Brickwall_texture.jpg";
-const std::string texturePath_Earth = "Earth.jpg";
-const std::string texturePath_moon = "moon.jpg";
+const std::string texturePath_Earth = "earth.jpg";
+const std::string texturePath_Moon = "moon.jpg";
 
 int main()
 {
 	Window* window = new Window();
-	Mesh mesh;
-	Texture texture;
-	Transform transform;
-
 	if (!window->init(SCR_WIDTH, SCR_HEIGHT)) 
 	{
 		return -1;
 	}
 
-	if (!mesh.loadContent(1))
-	{
-		return -1;
-	}
+	Texture textures[3] = { { texturePath_Brick },
+							{ texturePath_Earth },
+							{ texturePath_Moon } };
+	Transform* transform = new Transform;
+	Mesh mesh;
 
 	GLuint programHandle = glCreateProgram();
 	Camera* camera= new Camera(programHandle, window);
 	Core core(window, camera);
-
 	Shader shader(programHandle, "Shaders/basic.vert", "Shaders/basic.frag");
-	core.update(programHandle, texture, transform);
+
+	core.update(programHandle, textures, transform);
 
 	glfwTerminate();
 	return 0;

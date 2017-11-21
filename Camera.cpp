@@ -54,6 +54,8 @@ void Camera::processKeyboard(int key)
 	{
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *  velocity;
 	}
+
+	cameraPos.y = 0;
 }
 
 void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
@@ -83,4 +85,3 @@ void Camera::updateVectors()
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	cameraFront = glm::normalize(front);
 }
-

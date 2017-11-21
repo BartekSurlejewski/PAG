@@ -39,7 +39,7 @@ void Core::processInput(GLFWwindow *window)
 	processMouseMovement();
 }
 
-void Core::update(GLuint programHandle, Texture texture, Transform transform)
+void Core::update(GLuint programHandle, Texture textures[], Transform* transform)
 {
 	GLFWwindow* window = screen->getWindow();
 	GLfloat deltaTime = 0.0f;
@@ -58,8 +58,8 @@ void Core::update(GLuint programHandle, Texture texture, Transform transform)
 		camera->update(programHandle, screen, deltaTime);
 		for (int i = 0; i < 10; i++)
 		{
-			texture.loadTexture(textures[i % 3]);
-			transform.move(programHandle, i);
+			glBindTexture(GL_TEXTURE_2D, textures[i % 3].getTexture());
+			transform->move(programHandle, i);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 

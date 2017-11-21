@@ -24,7 +24,7 @@ int Window::init(int width, int height)
 	if (!glfwInit())
 		return -1;
 
-	window = glfwCreateWindow(width, height, "Hello triangle!", nullptr, nullptr);
+	window = glfwCreateWindow(width, height, "Hello 3D!", nullptr, nullptr);
 
 	if(window == nullptr)
 	{

@@ -6,6 +6,7 @@
 
 Mesh::Mesh()
 {
+	loadContent(1);
 }
 
 
