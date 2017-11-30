@@ -43,7 +43,8 @@ public:
 	}
 
 	void Render(Shader* shader);
-	void SetNoder(Model* node);
+	void SetNode(Model* node);
+	void SetTransform(Transform);
 
 	void Draw(Shader* shader);
 private:

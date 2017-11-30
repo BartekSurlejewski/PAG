@@ -44,6 +44,7 @@ int main()
 	Core core(window, camera, shader);
 
 	Model nanosuit("Models/Nanosuit/nanosuit.obj");
+	//Model boxGreen("Models/CubeGreen/CubeGreen.obj");
 
 	core.update(programHandle, shader, rootNode, nanosuit);
 

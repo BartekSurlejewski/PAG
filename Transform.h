@@ -11,7 +11,7 @@
 class Transform
 {
 public:
-	Transform(glm::mat4 transformation, GLuint programHandle)
+	Transform(glm::mat4 transformation)
 	{
 		this->transformation = transformation;
 	}

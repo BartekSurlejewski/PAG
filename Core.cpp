@@ -65,10 +65,12 @@ void Core::update(GLuint programHandle, Shader shader, GraphNode* rootNode, Mode
 		camera->update(programHandle, screen, deltaTime);
 		shader.use();
 
-		glm::mat4 model;
-		/*model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));*/
-		shader.setMat4("model", model);
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+		Transform transformation(model);
+		nanosuit.SetTransform(transformation);
 		nanosuit.Render(&shader);
 
 		glfwSwapBuffers(window);

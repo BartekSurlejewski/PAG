@@ -14,6 +14,11 @@ void Model::Render(Shader* shader)
 			node->Draw(shader);
 }
 
+void Model::SetTransform(Transform newTransform)
+{
+	transform = newTransform;
+}
+
 void Model::Draw(Shader* shader)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
