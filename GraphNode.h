@@ -14,12 +14,11 @@ public:
 	void addChild(GraphNode* node);
 
 	vector<Mesh> meshes;
+	std::vector<GraphNode*> children;
+	Transform local;
 
 private:
-	Transform local;
 	Transform world;
-	//Mesh* mesh;
-	std::vector<GraphNode*> children;
 	int numChildren = 0;
 	GLuint transformLoc;
 

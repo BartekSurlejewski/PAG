@@ -6,22 +6,24 @@ Scene::Scene()
 {
 	rootNode = new GraphNode();
 
-	Model nanosuit("Models/Nanosuit/nanosuit.obj", rootNode);
-	//Model nanosuit2("Models/Nanosuit/nanosuit.obj", rootNode);
+	GraphNode* nanosuitNode = new GraphNode();
+	Model nanosuit("Models/Nanosuit/nanosuit.obj", nanosuitNode);
+	rootNode->addChild(nanosuitNode);
 
-	/*glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
-	model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+	GraphNode* nanosuitNode2 = new GraphNode();
+	Model nanosuit2("Models/Nanosuit/nanosuit.obj", nanosuitNode2);
+	nanosuitNode->addChild(nanosuitNode2);
+
+	glm::mat4 model = glm::mat4(1.0f);
+	//model = glm::rotate(model, 90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::scale(glm::vec3(0.2f, 0.2f, 0.2f));
 	Transform transformation(model);
-	nanosuit.SetTransform(transformation);
+	nanosuitNode->local = transformation;
 
-    model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
-	model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::mat4(1.0f);
+	model = glm::translate(glm::vec3(10.0f, 0.0f, 0.0f));
 	transformation.transformation = model;
-	nanosuit2.SetTransform(transformation);*/
+	nanosuitNode2->local = transformation;
 }
 
 
