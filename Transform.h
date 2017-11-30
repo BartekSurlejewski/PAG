@@ -15,12 +15,15 @@ public:
 	{
 		this->transformation = transformation;
 	}
-	Transform(){}
+	Transform()
+	{
+		transformation = glm::mat4(1.0f);
+	}
 	~Transform(){}
 	Transform combine(Transform& other);
 
 	static Transform origin();
 
-	glm::mat4 transformation = glm::mat4(1.0f);
+	glm::mat4 transformation;
 };
 

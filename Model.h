@@ -21,6 +21,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include "GraphNode.h"
 
 #pragma once
 
@@ -33,9 +34,9 @@ public:
 	string directory;
 	
 
-	Model::Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
+	Model::Model(string const &path, GraphNode* rootNode, bool gamma = false) : gammaCorrection(gamma)
 	{
-		loadModel(path);
+		loadModel(path, rootNode);
 	}
 
 	Model::~Model()
@@ -52,8 +53,8 @@ private:
 	Transform transform;
 	bool gammaCorrection;
 
-	void loadModel(string path);
-	void processNode(aiNode *node, const aiScene *scene);
+	void loadModel(string path, GraphNode*);
+	void processNode(aiNode *node, const aiScene *scene, GraphNode*);
 	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 	vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
 	unsigned int TextureFromFile(const char *path, const string &directory);

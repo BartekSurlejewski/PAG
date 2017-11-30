@@ -13,13 +13,13 @@ std::string textures[] = {
 
 Core::Core(Window* window, Camera* camera, Shader shader)
 {
-	screen = window;
-	this->camera = camera;
+	this->screen = window;
+	this->camera = camera;	
+	scene = new Scene();
 
-	GLuint transformLoc;
-	glm::mat4 trans = glm::mat4(1.0f);
-	transformLoc = glGetUniformLocation(shader.programHandle, "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	glm::mat4 transform = glm::mat4(1.0f);
+	GLuint transformLoc = glGetUniformLocation(shader.programHandle, "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 }
 
 Core::~Core()
@@ -44,7 +44,7 @@ void Core::processInput(GLFWwindow *window)
 	processMouseMovement();
 }
 
-void Core::update(GLuint programHandle, Shader shader, GraphNode* rootNode, Model nanosuit)
+void Core::update(GLuint programHandle, Shader shader)
 {
 	GLFWwindow* window = screen->getWindow();
 	GLfloat deltaTime = 0.0f;
@@ -55,8 +55,6 @@ void Core::update(GLuint programHandle, Shader shader, GraphNode* rootNode, Mode
 		glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shader.use();
-
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -65,13 +63,7 @@ void Core::update(GLuint programHandle, Shader shader, GraphNode* rootNode, Mode
 		camera->update(programHandle, screen, deltaTime);
 		shader.use();
 
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
-		Transform transformation(model);
-		nanosuit.SetTransform(transformation);
-		nanosuit.Render(&shader);
+		scene->Render(&shader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

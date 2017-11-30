@@ -37,16 +37,13 @@ int main()
 
 	Shader shader(programHandle, "Shaders/basic.vert", "Shaders/basic.frag");
 
-	GraphNode* rootNode = new GraphNode(NULL);
-	rootNode->render(programHandle, Transform::origin(), true, shader);
+	/*GraphNode* rootNode = new GraphNode(NULL);
+	rootNode->render(programHandle, Transform::origin(), true, shader);*/
 
 	Camera* camera= new Camera(programHandle, window);
 	Core core(window, camera, shader);
 
-	Model nanosuit("Models/Nanosuit/nanosuit.obj");
-	//Model boxGreen("Models/CubeGreen/CubeGreen.obj");
-
-	core.update(programHandle, shader, rootNode, nanosuit);
+	core.update(programHandle, shader);
 
 	glfwTerminate();
 	return 0;

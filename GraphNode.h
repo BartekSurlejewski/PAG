@@ -9,21 +9,20 @@
 class GraphNode
 {
 public:
-	GraphNode(Mesh*);	
-	~GraphNode();
-	void render(GLuint, Transform, bool, Shader);
-	void addChild(GraphNode node);
+	GraphNode();	
+	void render(GLuint, Transform, Shader*);
+	void addChild(GraphNode* node);
 
 	vector<Mesh> meshes;
 
 private:
 	Transform local;
 	Transform world;
-	Mesh* mesh;
+	//Mesh* mesh;
 	std::vector<GraphNode*> children;
 	int numChildren = 0;
-	bool dirty;
+	GLuint transformLoc;
 
 	void setTransform(Transform);
-	void renderMesh(GLuint, Mesh*, Transform, Shader);
+	void renderMesh(GLuint, Mesh*, Transform, Shader*);
 };

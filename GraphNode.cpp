@@ -2,48 +2,39 @@
 #include "GraphNode.h"
 
 
-GraphNode::GraphNode(Mesh* mesh) : mesh(mesh),
-local(Transform::origin()), dirty(true)
+GraphNode::GraphNode() : local(Transform::origin())
 {
 }
 
-
-GraphNode::~GraphNode()
+void GraphNode::render(GLuint programHandle, Transform parentWorld, Shader* shader)
 {
-}
+	world = local.combine(parentWorld);
 
-void GraphNode::render(GLuint programHandle, Transform parentWorld, bool dirty_, Shader shader)
-{
-	dirty_ |= dirty;
-	if (dirty)
+	for each(Mesh mesh in meshes)
 	{
-		world = local.combine(parentWorld);
-		dirty_ = false;
+		renderMesh(programHandle, &mesh, world, shader);
+		transformLoc = glGetUniformLocation(shader->programHandle, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(world.transformation));
 	}
-
-	if (mesh) renderMesh(programHandle, mesh, world, shader);
 
 	for (int i = 0; i < numChildren; i++)
 	{
-		children[i]->render(programHandle, world, dirty, shader);
+		children[i]->render(programHandle, world, shader);
 	}
 }
 
 void GraphNode::setTransform(Transform local)
 {
 	this->local = local;
-	dirty = true;
 }
 
-void GraphNode::renderMesh(GLuint programHandle, Mesh *mesh, Transform transform, Shader shader)
+void GraphNode::renderMesh(GLuint programHandle, Mesh *mesh, Transform transform, Shader* shader)
 {
-	GLuint transformLoc = glGetUniformLocation(programHandle, "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform.transformation));
-	mesh->Draw(&shader);
+	mesh->Draw(shader);
 }
 
-void GraphNode::addChild(GraphNode node)
+void GraphNode::addChild(GraphNode* node)
 {
-	children.push_back(&node);
+	children.push_back(node);
 	++numChildren;
 }

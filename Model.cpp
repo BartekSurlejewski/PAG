@@ -7,11 +7,20 @@ void Model::Render(Shader* shader)
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform.transformation));
 
 	for (GLuint i = 0; i < meshes.size(); i++)
-		meshes[i].Draw(shader);
+	{
+			meshes[i].Draw(shader);
+	}
 
 	if (nodes.size() > 0)
+	{
 		for each(Model* node in nodes)
 			node->Draw(shader);
+	}
+}
+
+void Model::SetNode(Model* node)
+{
+	nodes.push_back(node);
 }
 
 void Model::SetTransform(Transform newTransform)
@@ -22,10 +31,12 @@ void Model::SetTransform(Transform newTransform)
 void Model::Draw(Shader* shader)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
+	{
 		meshes[i].Draw(shader);
+	}
 }
 
-void Model::loadModel(string path)
+void Model::loadModel(string path, GraphNode* node)
 {
 	Assimp::Importer import;
 	const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -37,21 +48,24 @@ void Model::loadModel(string path)
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 
-	processNode(scene->mRootNode, scene);
+	processNode(scene->mRootNode, scene, node);
 }
 
-void Model::processNode(aiNode *node, const aiScene *scene)
+void Model::processNode(aiNode *node, const aiScene *scene, GraphNode* graphNode)
 {
 	// process all the node's meshes (if any)
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
+		std::cout << node->mNumMeshes << std::endl;
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene));
+		graphNode->meshes.push_back(processMesh(mesh, scene));
 	}
 	// then do the same for each of its children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene);
+		GraphNode* child = new GraphNode();
+		graphNode->addChild(child);
+		processNode(node->mChildren[i], scene, child);
 	}
 }
 
@@ -86,13 +100,13 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		else
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 
-		/*vector.x = mesh->mTangents[i].x;
-		vector.y = mesh->mTangents[i].y;
-		vector.z = mesh->mTangents[i].z;
-		vertex.Tangent = vector;
-		vector.x = mesh->mBitangents[i].x;
-		vector.y = mesh->mBitangents[i].y;
-		vector.z = mesh->mBitangents[i].z;*/
+		//vector.x = mesh->mTangents[i].x;
+		//vector.y = mesh->mTangents[i].y;
+		//vector.z = mesh->mTangents[i].z;
+		//vertex.Tangent = vector;
+		//vector.x = mesh->mBitangents[i].x;
+		//vector.y = mesh->mBitangents[i].y;
+		//vector.z = mesh->mBitangents[i].z;
 
 		vertices.push_back(vertex);
 	}
@@ -104,10 +118,10 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 			indices.push_back(face.mIndices[j]);
 	}
 	// process material
-		/*if (mesh->mMaterialIndex >= 0)
+		if (mesh->mMaterialIndex >= 0)
 		{
 			if (mesh->mMaterialIndex >= 0)
-			{*/
+			{
 				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
@@ -118,9 +132,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-		/*	}
+			}
 		}
-*/
+
 	return Mesh(vertices, indices, textures);
 }
 
