@@ -163,6 +163,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="UI.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -187,6 +188,7 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UI.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>

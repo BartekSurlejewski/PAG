@@ -17,7 +17,7 @@
 #include "Scene.h"
 #include "GraphNode.h"
 #include "Model.h"
-//#include "stb_image.h"
+#include "UI.h"
 
 const int SCR_WIDTH = 1000;
 const int SCR_HEIGHT = 640;
@@ -33,18 +33,18 @@ int main()
 		return -1;
 	}
 
+	UI ui(SCR_WIDTH, SCR_HEIGHT, window->getWindow());
+
 	GLuint programHandle = glCreateProgram();
 
 	Shader shader(programHandle, "Shaders/basic.vert", "Shaders/basic.frag");
-
-	/*GraphNode* rootNode = new GraphNode(NULL);
-	rootNode->render(programHandle, Transform::origin(), true, shader);*/
 
 	Camera* camera= new Camera(programHandle, window);
 	Core core(window, camera, shader);
 
 	core.update(programHandle, shader);
 
+	TwTerminate();
 	glfwTerminate();
 	return 0;
 }

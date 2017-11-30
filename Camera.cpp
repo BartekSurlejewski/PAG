@@ -58,27 +58,32 @@ void Camera::processKeyboard(int key)
 	}
 }
 
-void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
-{
-	xoffset *= mouseSensitivity;
-	yoffset *= mouseSensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	if (constrainPitch)
-	{
-		if (pitch > 89.0f)
-			pitch = 89.0f;
-		if (pitch < -89.0f)
-			pitch = -89.0f;
-	}
-
-	updateVectors();
-}
+//void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
+//{
+//	xoffset *= mouseSensitivity;
+//	yoffset *= mouseSensitivity;
+//
+//	yaw += xoffset;
+//	pitch += yoffset;
+//
+//	if (constrainPitch)
+//	{
+//		if (pitch > 89.0f)
+//			pitch = 89.0f;
+//		if (pitch < -89.0f)
+//			pitch = -89.0f;
+//	}
+//
+//	updateVectors();
+//}
 
 void Camera::updateVectors()
 {
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
 	glm::vec3 front;
 	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));

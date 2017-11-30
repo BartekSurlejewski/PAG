@@ -56,7 +56,6 @@ void Model::processNode(aiNode *node, const aiScene *scene, GraphNode* graphNode
 	// process all the node's meshes (if any)
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
-		std::cout << node->mNumMeshes << std::endl;
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 		graphNode->meshes.push_back(processMesh(mesh, scene));
 	}

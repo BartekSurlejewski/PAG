@@ -18,7 +18,7 @@ public:
 
 private:
 	void processInput(GLFWwindow*);
-	void processMouseMovement();
+	//void processMouseMovement();
 
 	GLdouble xpos, ypos;
 	GLfloat lastX = 500, lastY = 320;
