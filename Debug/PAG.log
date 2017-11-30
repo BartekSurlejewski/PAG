@@ -1,5 +1,5 @@
-﻿  Skipping... (no relevant changes detected)
-  Shader.cpp
-  PAG.cpp
+﻿  Model.cpp
+c:\users\20400\onedrive\dokumenty\github\pag\pag\shader.h(53): warning C4101: 'infoLog': unreferenced local variable
+c:\users\20400\onedrive\dokumenty\github\pag\pag\shader.h(52): warning C4101: 'success': unreferenced local variable
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.exe
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.pdb (Partial PDB)

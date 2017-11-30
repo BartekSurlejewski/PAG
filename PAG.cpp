@@ -15,7 +15,9 @@
 #include "Camera.h"
 #include "Transform.h"
 #include "Scene.h"
-#include "stb_image.h"
+#include "GraphNode.h"
+#include "Model.h"
+//#include "stb_image.h"
 
 const int SCR_WIDTH = 1000;
 const int SCR_HEIGHT = 640;
@@ -31,18 +33,19 @@ int main()
 		return -1;
 	}
 
-	Texture textures[3] = { { texturePath_Brick },
-							{ texturePath_Earth },
-							{ texturePath_Moon } };
-	Transform* transform = new Transform;
-	Mesh mesh;
-
 	GLuint programHandle = glCreateProgram();
-	Camera* camera= new Camera(programHandle, window);
-	Core core(window, camera);
+
 	Shader shader(programHandle, "Shaders/basic.vert", "Shaders/basic.frag");
 
-	core.update(programHandle, textures, transform);
+	GraphNode* rootNode = new GraphNode(NULL);
+	rootNode->render(programHandle, Transform::origin(), true, shader);
+
+	Camera* camera= new Camera(programHandle, window);
+	Core core(window, camera, shader);
+
+	Model nanosuit("Models/Nanosuit/nanosuit.obj");
+
+	core.update(programHandle, shader, rootNode, nanosuit);
 
 	glfwTerminate();
 	return 0;

@@ -16,7 +16,7 @@ public:
 
 private:
 	int height, width;
-	glm::mat4 view, projection;
+	glm::mat4 world, view, projection, WVP;
 	glm::vec3 cameraPos, cameraFront, cameraUp;
 
 	GLfloat deltaTime;

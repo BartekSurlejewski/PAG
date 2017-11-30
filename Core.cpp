@@ -11,10 +11,15 @@ std::string textures[] = {
 						"images.jpg"
 };
 
-Core::Core(Window* window, Camera* camera)
+Core::Core(Window* window, Camera* camera, Shader shader)
 {
 	screen = window;
 	this->camera = camera;
+
+	GLuint transformLoc;
+	glm::mat4 trans = glm::mat4(1.0f);
+	transformLoc = glGetUniformLocation(shader.programHandle, "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 }
 
 Core::~Core()
@@ -39,7 +44,7 @@ void Core::processInput(GLFWwindow *window)
 	processMouseMovement();
 }
 
-void Core::update(GLuint programHandle, Texture textures[], Transform* transform)
+void Core::update(GLuint programHandle, Shader shader, GraphNode* rootNode, Model nanosuit)
 {
 	GLFWwindow* window = screen->getWindow();
 	GLfloat deltaTime = 0.0f;
@@ -47,8 +52,10 @@ void Core::update(GLuint programHandle, Texture textures[], Transform* transform
 
 	while (!glfwWindowShouldClose(window))
 	{
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shader.use();
 
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -56,12 +63,13 @@ void Core::update(GLuint programHandle, Texture textures[], Transform* transform
 
 		processInput(window);
 		camera->update(programHandle, screen, deltaTime);
-		for (int i = 0; i < 10; i++)
-		{
-			glBindTexture(GL_TEXTURE_2D, textures[i % 3].getTexture());
-			transform->move(programHandle, i);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		shader.use();
+
+		glm::mat4 model;
+		/*model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));*/
+		shader.setMat4("model", model);
+		nanosuit.Render(&shader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

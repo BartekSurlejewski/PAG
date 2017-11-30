@@ -3,7 +3,7 @@
 
 Camera::Camera(GLuint programHandle, Window* window)
 {
-	cameraPos = glm::vec3(1.5f, 0.0f, 3.0f);
+	cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
 	cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	view = glm::mat4(1.0f);
@@ -27,11 +27,13 @@ void Camera::update(GLuint programHandle, Window* window, GLfloat deltaTime)
 						cameraPos + cameraFront,	// at this point camera is looking
 						cameraUp);					// head is up
 
-	GLuint viewLoc = glGetUniformLocation(programHandle, "view");
-	GLuint projectionLoc = glGetUniformLocation(programHandle, "projection");
+	world = glm::mat4(1.0f);
 
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+	projection = glm::perspective(45.0f, (float)width / (float)height, 0.001f, 1000.0f);
+	WVP = projection * view * world;
+
+	GLuint wvpLoc = glGetUniformLocation(programHandle, "wvp");
+	glUniformMatrix4fv(wvpLoc, 1, GL_FALSE, glm::value_ptr(WVP));
 }
 
 void Camera::processKeyboard(int key)
@@ -54,8 +56,6 @@ void Camera::processKeyboard(int key)
 	{
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *  velocity;
 	}
-
-	cameraPos.y = 0;
 }
 
 void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)

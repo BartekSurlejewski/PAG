@@ -6,12 +6,11 @@
 class Texture
 {
 public:
-	Texture(std::string);
+	Texture();
 	~Texture();
-	void loadTexture(std::string);
-	GLuint getTexture();
 
-private:
-	GLuint texture;
+	unsigned int id;
+	std::string type;
+	std::string path;
 };
 

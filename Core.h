@@ -3,14 +3,17 @@
 #include "Texture.h"
 #include "Transform.h"
 #include "Camera.h"
+#include "Shader.h"
+#include "GraphNode.h"
+#include "Model.h"
 
 #pragma once
 class Core
 {
 public:
-	Core(Window*, Camera*);
+	Core(Window*, Camera*, Shader);
 	~Core();
-	void update(GLuint, Texture[], Transform*);
+	void update(GLuint, Shader, GraphNode*, Model);
 
 private:
 	void processInput(GLFWwindow*);

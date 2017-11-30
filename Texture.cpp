@@ -1,5 +1,3 @@
-#define STB_IMAGE_IMPLEMENTATION
-
 #include "stdafx.h"
 #include "Texture.h"
 #include <iostream>
@@ -8,9 +6,9 @@
 #include "stb_image.h"
 #include <string>
 
-Texture::Texture(std::string texturePath)
+Texture::Texture()
 {
-	int width, height, nrChannels;
+	/*int width, height, nrChannels;
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -33,15 +31,10 @@ Texture::Texture(std::string texturePath)
 		std::cout << "Failed to load texture." << std::endl;
 	}
 
-	stbi_image_free(data);
+	stbi_image_free(data);*/
 }
 
 
 Texture::~Texture()
 {
-}
-
-GLuint Texture::getTexture()
-{
-	return texture;
 }

@@ -11,11 +11,16 @@
 class Transform
 {
 public:
-	Transform();
-	~Transform();
-	void move(GLuint, int);
+	Transform(glm::mat4 transformation, GLuint programHandle)
+	{
+		this->transformation = transformation;
+	}
+	Transform(){}
+	~Transform(){}
+	Transform combine(Transform& other);
 
-private:
-	glm::mat4 model;
+	static Transform origin();
+
+	glm::mat4 transformation = glm::mat4(1.0f);
 };
 
