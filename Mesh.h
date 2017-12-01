@@ -40,6 +40,17 @@ public:
 		setupMesh();
 	}
 
+	void SetBoundingBox(glm::vec3 &min, glm::vec3 &max)
+	{
+		boundingBoxMin = min;
+		boundingBoxMax = max;
+	}
+	void GetBoundingBox(glm::vec3 &min, glm::vec3 &max)
+	{
+		min = boundingBoxMin;
+		max = boundingBoxMax;
+	}
+
 	// render the mesh
 	void Draw(Shader* shader)
 	{
@@ -87,6 +98,8 @@ public:
 
 private:
 	unsigned int VBO, EBO;
+	glm::vec3 boundingBoxMin;
+	glm::vec3 boundingBoxMax;
 
 	void setupMesh()
 	{

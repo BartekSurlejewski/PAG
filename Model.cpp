@@ -59,6 +59,7 @@ void Model::processNode(aiNode *node, const aiScene *scene, GraphNode* graphNode
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 		graphNode->meshes.push_back(processMesh(mesh, scene));
 	}
+
 	// then do the same for each of its children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
@@ -74,6 +75,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	vector<unsigned int> indices;
 	vector<Texture> textures;
 
+	glm::vec3 min(FLT_MIN);
+	glm::vec3 max(FLT_MAX);
+
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
@@ -83,6 +87,14 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		vector.y = mesh->mVertices[i].y;
 		vector.z = mesh->mVertices[i].z;
 		vertex.Position = vector;
+
+		if (vertex.Position.x < min.x) min.x = vertex.Position.x;
+		if (vertex.Position.y < min.y) min.y = vertex.Position.y;
+		if (vertex.Position.z < min.z) min.z = vertex.Position.z;
+
+		if (vertex.Position.x > max.x) max.x = vertex.Position.x;
+		if (vertex.Position.y > max.y) max.y = vertex.Position.y;
+		if (vertex.Position.z > max.z) max.z = vertex.Position.z;
 
 		vector.x = mesh->mNormals[i].x;
 		vector.y = mesh->mNormals[i].y;
@@ -98,14 +110,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		}
 		else
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-
-		//vector.x = mesh->mTangents[i].x;
-		//vector.y = mesh->mTangents[i].y;
-		//vector.z = mesh->mTangents[i].z;
-		//vertex.Tangent = vector;
-		//vector.x = mesh->mBitangents[i].x;
-		//vector.y = mesh->mBitangents[i].y;
-		//vector.z = mesh->mBitangents[i].z;
 
 		vertices.push_back(vertex);
 	}
@@ -134,7 +138,10 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 			}
 		}
 
-	return Mesh(vertices, indices, textures);
+	Mesh resultMesh(vertices, indices, textures);
+	resultMesh.SetBoundingBox(min, max);
+
+	return resultMesh;
 }
 
 vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
