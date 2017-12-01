@@ -11,6 +11,7 @@ public:
 	~Window();
 	int init(int width, int height);
 
+	bool isCursorEnabled;
 	GLFWwindow* getWindow();
 
 private:

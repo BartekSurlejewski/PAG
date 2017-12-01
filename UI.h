@@ -13,6 +13,8 @@ public:
 private:
 
 
-	std::string Aa;
+	float Aa;
+	std::string Bb;
+	std::string Cc;
 };
 

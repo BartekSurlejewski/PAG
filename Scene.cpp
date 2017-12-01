@@ -17,6 +17,7 @@ Scene::Scene()
 	glm::mat4 model = glm::mat4(1.0f);
 	//model = glm::rotate(model, 90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(glm::vec3(0.2f, 0.2f, 0.2f));
+	model = glm::translate(glm::vec3(0.0f, 0.0f, -20.0f));
 	Transform transformation(model);
 	nanosuitNode->local = transformation;
 

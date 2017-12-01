@@ -9,7 +9,9 @@ UI::UI(const int width, const int height, GLFWwindow* window)
 
 	bar = TwNewBar("Model administration");
 
-	TwAddVarRW(bar, "Aa", TW_TYPE_CDSTRING, &Aa, "");
+	TwAddVarRW(bar, "Aa", TW_TYPE_FLOAT, &Aa, "");
+	TwAddVarRW(bar, "Bb", TW_TYPE_CDSTRING, &Bb, "");
+	TwAddVarRW(bar, "Cc", TW_TYPE_CDSTRING, &Cc, "");
 
 	/*glfwSetCursorPosCallback(window, (GLFWcursorposfun)TwEventMousePosGLFW);
 	glfwSetMouseButtonCallback(window, (GLFWmousebuttonfun)TwEventMouseButtonGLFW);*/

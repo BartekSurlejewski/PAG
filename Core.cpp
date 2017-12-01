@@ -15,32 +15,42 @@ std::string textures[] = {
 Camera* globalCamera = nullptr;
 float xOffset = 0.0f;
 float yOffset = 0.0f;
+bool isCursorEnabled;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	static float lastX = 1000 / 2;
-	static float lastY = 640 / 2;
+	if(!TwEventMousePosGLFW((int)xpos, (int)ypos))
+	{
+		static float lastX = 1000 / 2;
+		static float lastY = 640 / 2;
 
+		xOffset = xpos - lastX;
+		yOffset = lastY - ypos;
 
-	xOffset = xpos - lastX;
-	yOffset = lastY - ypos;
+		lastX = xpos;
+		lastY = ypos;
+		float sensitivity = 0.05;
+		xOffset *= sensitivity;
+		yOffset *= sensitivity;
 
-	lastX = xpos;
-	lastY = ypos;
-	float sensitivity = 0.05;
-	xOffset *= sensitivity;
-	yOffset *= sensitivity;
-
-	globalCamera->yaw += xOffset;
-	globalCamera->pitch += yOffset;
-	globalCamera->updateVectors();
-
-	TwEventMousePosGLFW((int)xpos, (int)ypos);
+		globalCamera->yaw += xOffset;
+		globalCamera->pitch += yOffset;
+		globalCamera->updateVectors();
+	}
 }
 
 void mouse_button(GLFWwindow* window, int button, int x, int y)
 {
-	if (!TwEventMouseButtonGLFW(button, x))
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && x==0)
+	{
+		if(isCursorEnabled)
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		else
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+		isCursorEnabled = !isCursorEnabled;
+	}
+	else if (!TwEventMouseButtonGLFW(button, x))
 	{
 		std::cout << "I'm terribly sorry, I couldn't handle this event. :(" << std::endl;
 	}
@@ -52,6 +62,7 @@ Core::Core(Window* window, Camera* camera, Shader shader)
 	this->screen = window;
 	this->camera = camera;	
 	scene = new Scene();
+	isCursorEnabled = window->isCursorEnabled;
 
 	glfwSetCursorPosCallback(window->getWindow(), mouse_callback);
 	glfwSetMouseButtonCallback(window->getWindow(), mouse_button);
@@ -78,8 +89,7 @@ void Core::processInput(GLFWwindow *window)
 		camera->processKeyboard(GLFW_KEY_A);
 	else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera->processKeyboard(GLFW_KEY_D);
-
-	glfwGetCursorPos(window, &xpos, &ypos);
+	//glfwGetCursorPos(window, &xpos, &ypos);
 }
 
 void Core::update(GLuint programHandle, Shader shader)

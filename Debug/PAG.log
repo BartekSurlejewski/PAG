@@ -1,9 +1,3 @@
-﻿  Core.cpp
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(25): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(26): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(29): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(30): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(98): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+﻿  Scene.cpp
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.exe
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.pdb (Partial PDB)

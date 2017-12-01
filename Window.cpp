@@ -44,6 +44,7 @@ int Window::init(int width, int height)
 	glViewport(0, 0, width, height);
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	isCursorEnabled = true;
 	glEnable(GL_DEPTH_TEST);
 
 	return true;
