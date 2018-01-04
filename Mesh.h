@@ -40,12 +40,12 @@ public:
 		setupMesh();
 	}
 
-	void SetBoundingBox(glm::vec3 &min, glm::vec3 &max)
+	void SetAABB(glm::vec3 &min, glm::vec3 &max)
 	{
 		boundingBoxMin = min;
 		boundingBoxMax = max;
 	}
-	void GetBoundingBox(glm::vec3 &min, glm::vec3 &max)
+	void GetAABB(glm::vec3 &min, glm::vec3 &max)
 	{
 		min = boundingBoxMin;
 		max = boundingBoxMax;

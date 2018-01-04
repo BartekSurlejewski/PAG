@@ -16,14 +16,17 @@ public:
 	~Core();
 	void update(GLuint, Shader);
 
+	TwBar* barHierarchy;
+
+	Window* screen;
+	Camera* camera;
+	Scene* scene;
+
 private:
 	void processInput(GLFWwindow*);
 	//void processMouseMovement();
 
 	GLdouble xpos, ypos;
 	GLfloat lastX = 500, lastY = 320;
-	Window* screen;
-	Camera* camera;
-	Scene* scene;
 };
 

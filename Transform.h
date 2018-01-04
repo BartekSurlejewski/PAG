@@ -11,19 +11,24 @@
 class Transform
 {
 public:
-	Transform(glm::mat4 transformation)
+	Transform(glm::mat4 transformation): translation(0.0f, 0.0f, 0.0f), scale(1.0f), rotation(0.0f, 0.0f, 0.0f)
 	{
 		this->transformation = transformation;
 	}
-	Transform()
+	Transform(): translation(0.0f, 0.0f, 0.0f), scale(1.0f), rotation(0.0f, 0.0f, 0.0f)
 	{
 		transformation = glm::mat4(1.0f);
 	}
 	~Transform(){}
 	Transform combine(Transform& other);
+	void CalculateWorldMatrix();
 
 	static Transform origin();
 
 	glm::mat4 transformation;
+
+	glm::vec3 translation;
+	glm::vec3 scale;
+	glm::vec3 rotation;
 };
 

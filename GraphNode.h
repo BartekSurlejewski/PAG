@@ -12,10 +12,19 @@ public:
 	GraphNode();	
 	void render(GLuint, Transform, Shader*);
 	void addChild(GraphNode* node);
+	void SetAABB(const glm::vec3& vMin, const glm::vec3& vMax);
+	void GetAABB(glm::vec3& vMin, glm::vec3& vMax);
 
 	vector<Mesh> meshes;
+	vector<unsigned int> meshesIds;
+
 	std::vector<GraphNode*> children;
 	Transform local;
+	glm::vec3 AABBMin;
+	glm::vec3 AABBMax;
+
+	glm::vec3 boundingSphereCenter;
+	float boundingSphereRadius;
 
 private:
 	Transform world;

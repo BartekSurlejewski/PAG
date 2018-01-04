@@ -6,7 +6,7 @@ UI::UI(const int width, const int height, GLFWwindow* window)
 {
 	TwInit(TW_OPENGL, NULL);
 	TwWindowSize(width, height);
-
+	//bar = TwNewBar("Model administration");
 	/*bar = TwNewBar("Model administration");
 
 	TwAddVarRW(bar, "Aa", TW_TYPE_FLOAT, &Aa, "");

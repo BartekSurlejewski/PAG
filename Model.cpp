@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Model.h"
+#include <glm/gtx/matrix_decompose.hpp>
 
 void Model::Render(Shader* shader)
 {
@@ -57,8 +58,63 @@ void Model::processNode(aiNode *node, const aiScene *scene, GraphNode* graphNode
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-		graphNode->meshes.push_back(processMesh(mesh, scene));
+		meshes.push_back(processMesh(mesh, scene));
 	}
+
+	for ( unsigned int i = node->mNumMeshes; i > 0; i--)
+	{
+		Mesh* pMesh = &meshes[meshes.size() - i];
+
+		graphNode->meshes = meshes;
+		graphNode->meshesIds.push_back(meshes.size() - 1);
+	}
+
+	glm::mat4 matXformNode;
+	memcpy(&matXformNode, &node->mTransformation, sizeof(aiMatrix4x4));
+	matXformNode = glm::transpose(matXformNode);
+	glm::vec3 scale;
+	glm::quat rotation;
+	glm::vec3 translate;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::decompose(matXformNode, scale, rotation, translate, skew, perspective);
+
+	graphNode->local.scale = scale;
+	graphNode->local.translation = translate;
+	graphNode->local.CalculateWorldMatrix();
+
+		// Calculate AABB for this node from its meshes' AABBs.
+		for (unsigned int i = 0; i < graphNode->meshesIds.size(); i++)
+		{
+			const unsigned int meshID = graphNode->meshesIds[i];
+			Mesh* pMesh = &meshes[meshID];
+
+			// mesh min/max
+			glm::vec3 vMeshMin, vMeshMax;
+			pMesh->GetAABB(vMeshMin, vMeshMax);
+
+			// node min/max
+			glm::vec3& vMin = graphNode->AABBMin;
+			glm::vec3& vMax = graphNode->AABBMax;
+
+			// calculate aabb
+			if (vMeshMin.x < vMin.x)
+				vMin.x = vMeshMin.x;
+			if (vMeshMin.y < vMin.y)
+				vMin.y = vMeshMin.y;
+			if (vMeshMin.z < vMin.z)
+				vMin.z = vMeshMin.z;
+
+			if (vMeshMax.x > vMax.x)
+				vMax.x = vMeshMax.x;
+			if (vMeshMax.y > vMax.y)
+				vMax.y = vMeshMax.y;
+			if (vMeshMax.z > vMax.z)
+				vMax.z = vMeshMax.z;
+		}
+
+	graphNode->boundingSphereCenter = (graphNode->AABBMin + graphNode->AABBMax) * 0.5f;
+	graphNode->boundingSphereRadius = glm::distance(graphNode->AABBMax, graphNode->boundingSphereCenter);
 
 	// then do the same for each of its children
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -139,7 +195,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		}
 
 	Mesh resultMesh(vertices, indices, textures);
-	resultMesh.SetBoundingBox(min, max);
+	resultMesh.SetAABB(min, max);
 
 	return resultMesh;
 }

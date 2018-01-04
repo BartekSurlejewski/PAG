@@ -17,11 +17,12 @@ public:
 
 	GLfloat yaw = -90.0f;
 	GLfloat pitch = 0.0f;
+	glm::mat4 world, view, projection, WVP;
+	glm::vec3 cameraPos;
 
 private:
 	int height, width;
-	glm::mat4 world, view, projection, WVP;
-	glm::vec3 cameraPos, cameraFront, cameraUp;
+	glm::vec3 cameraFront, cameraUp;
 
 	GLfloat deltaTime;
 	GLfloat movementSpeed = 4.0f;

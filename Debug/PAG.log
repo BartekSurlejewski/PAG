@@ -1,8 +1,12 @@
-﻿  Scene.cpp
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  Core.cpp
-  Skipping... (no relevant changes detected)
-  PAG.cpp
+﻿  Core.cpp
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(89): warning C4101: 'viewMatrix': unreferenced local variable
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(88): warning C4101: 'modelMatrix': unreferenced local variable
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(90): warning C4101: 'projMatrix': unreferenced local variable
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(143): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(144): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(146): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(147): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(148): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(338): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.exe
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.pdb (Partial PDB)
