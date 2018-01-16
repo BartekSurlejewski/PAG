@@ -87,6 +87,8 @@ void Model::Draw(Shader & shader)
 void Model::DrawAsGraph(Shader & shader)
 {
 	Transform xForm;
+	xForm.translate = glm::vec3(200.0f);
+	xForm.scale = glm::vec3(0.0f);
 	xForm.CalculateWorldMatrix();
 
 	graph.rootNode->Draw(xForm, &shader);

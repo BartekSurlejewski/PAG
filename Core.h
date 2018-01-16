@@ -37,9 +37,11 @@ public:
 private:
 	void processInputCore(GLFWwindow* window, float dt);
 	void Render();
+	void DrawScene();
 	void SetLights();
 
 	Camera camera;
 
 	float lastTime;
+	unsigned int depthMapFBO;
 };

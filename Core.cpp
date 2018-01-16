@@ -7,14 +7,18 @@
 #include "PointLight.h"
 #include "SpotLight.h"
 
+#define SHADOW_WIDTH  1024
+#define SHADOW_HEIGHT  1024
+
+
 Core* core = nullptr;
 
 float xOffset = 0.0f;
 float yOffset = 0.0f;
 
-bool directionalLightOn = true;
-bool pointLightOn = true;
-bool spotLightOn = true;
+bool directionalLightOn = false;
+bool pointLightOn = false;
+bool spotLightOn = false;
 
 int UnProject(float winX, float winY, float winZ, const glm::mat4& matViewProjection, const int viewport[4], float* objX, float* objY, float* objZ)
 {
@@ -201,7 +205,7 @@ void mouse_button(GLFWwindow* window, int button, int x, int y)
 			glm::vec3 sphereCenterXYZ = glm::vec3(sphereCenter.x, sphereCenter.y, sphereCenter.z);
 
 			float dist = 0;
-			bIntersect = glm::intersectRaySphere(ray.origin, ray.direction, sphereCenterXYZ, sphereCenterSqared, dist);
+			//bIntersect = glm::intersectRaySphere(ray.origin, ray.direction, sphereCenterXYZ, sphereCenterSqared, dist);
 
 			if (bIntersect == true)
 			{
@@ -325,6 +329,27 @@ bool Core::Initialize()
 	// set inital viewport
 	glViewport(0, 0, 1280, 720);
 
+	//Depth map FBO configuration
+	glGenFramebuffers(1, &depthMapFBO);
+
+	//Create depth texture
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//Attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 	// INITIALIZE MESH DATA
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -404,7 +429,6 @@ void Core::Update()
 
 		processInputCore(window.GetWindow(), delta);
 
-
 		Render();
 
 		glfwSwapBuffers(window.GetWindow());
@@ -439,6 +463,19 @@ void Core::Render()
 	shader.SetMat4("projection", camera.projection);
 	shader.SetVec3("cameraPosition", camera.GetPosition());
 
+	////Render to depth map
+	//glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	//glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	//	glClear(GL_DEPTH_BUFFER_BIT);
+	DrawScene();
+
+	return;
+}
+
+void Core::DrawScene()
+{
+	/******SCENE RENDERRING******/
+
 	Material modelMaterial;
 	modelMaterial.specFactor = 10;
 	modelMaterial.SetSimple(shader);
@@ -471,7 +508,6 @@ void Core::Render()
 	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 	modelMaterial.specFactor = 64;
 	modelMaterial.SetSimple(shader);
-
 	model.DrawAsGraph(shader);
 
 	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -479,15 +515,13 @@ void Core::Render()
 	modelMaterial.SetSimple(shader);
 
 	Transform trans;
-	trans.translate = glm::vec3(0.0f, -100.0f, 0.0f);
+	trans.translate = glm::vec3(0.0f, -10.0f, 0.0f);
 	trans.CalculateWorldMatrix();
 
 	shader.SetMat4("model", trans.worldMatrix);
 	plane.Draw(shader);
 
 	TwDraw();
-
-	return;
 }
 
 void Core::SetLights()
@@ -495,15 +529,15 @@ void Core::SetLights()
 	directionalLight = new DirectionalLight();
 
 	Material matDirectional;
-	matDirectional.ambient = glm::vec3(1.0f, 0.0f, 0.0f);
-	matDirectional.specular = glm::vec3(1.0f, 0.0f, 0.0f);
+	matDirectional.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
+	matDirectional.specular = glm::vec3(0.1f, 0.1f, 0.1f);
 	directionalLight->SetMaterial(matDirectional);
 
 	// point light
 	pointLight = new PointLight();
 
 	Material matPoint;
-	matPoint.ambient = matPoint.specular = matPoint.diffuse = glm::vec3(0.0f, 1.0f, 0.0f);
+	matPoint.ambient = matPoint.specular = matPoint.diffuse = glm::vec3(0.1f, 0.1f, 0.1f);
 	pointLight->SetMaterial(matPoint);
 
 
@@ -511,6 +545,6 @@ void Core::SetLights()
 	spotLight = new SpotLight();
 
 	Material matSpot;
-	matSpot.ambient = matSpot.specular = matSpot.diffuse = glm::vec3(0.0f, 0.0f, 1.0f);
+	matSpot.ambient = matSpot.specular = matSpot.diffuse = glm::vec3(0.1f, 0.1f, 0.1f);
 	spotLight->SetMaterial(matSpot);
 }
