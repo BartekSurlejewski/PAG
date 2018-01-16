@@ -1,34 +1,30 @@
-#define GLFW_INCLUDE_NONE
+#pragma once
+
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
-#include <glad\glad.h>
-#include <glm\gtx\transform.hpp>
-#include <glm\gtc\type_ptr.hpp>
-#include "Mesh.h"
+#include <glm/gtc/matrix_transform.hpp>
 
-#pragma once
-class Transform
+struct Transform
 {
-public:
-	Transform(glm::mat4 transformation): translation(0.0f, 0.0f, 0.0f), scale(1.0f), rotation(0.0f, 0.0f, 0.0f)
+	Transform() : translate(0.0f, 0.0f, 0.0f), scale(1.0f), rotate(0.0f, 0.0f, 0.0f)
 	{
-		this->transformation = transformation;
+		CalculateWorldMatrix();
 	}
-	Transform(): translation(0.0f, 0.0f, 0.0f), scale(1.0f), rotation(0.0f, 0.0f, 0.0f)
-	{
-		transformation = glm::mat4(1.0f);
-	}
-	~Transform(){}
-	Transform combine(Transform& other);
-	void CalculateWorldMatrix();
 
-	static Transform origin();
-
-	glm::mat4 transformation;
-
-	glm::vec3 translation;
+	glm::vec3 translate;
 	glm::vec3 scale;
-	glm::vec3 rotation;
-};
+	glm::vec3 rotate;
 
+	glm::mat4 worldMatrix;
+
+	void CalculateWorldMatrix()
+	{
+		worldMatrix = glm::mat4(1);
+		worldMatrix = glm::translate(worldMatrix, translate);
+		worldMatrix = glm::rotate(worldMatrix, glm::radians(rotate.x), glm::vec3(1.0, 0.0, 0.0));
+		worldMatrix = glm::rotate(worldMatrix, glm::radians(rotate.y), glm::vec3(0.0, 1.0, 0.0));
+		worldMatrix = glm::rotate(worldMatrix, glm::radians(rotate.z), glm::vec3(0.0, 0.0, 1.0));
+		worldMatrix = glm::scale(worldMatrix, scale);
+	}
+};

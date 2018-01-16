@@ -1,20 +1,20 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
 #include <iostream>
+
+class GLFWwindow;
 
 class Window
 {
 public:
 	Window();
-	~Window();
-	int init(int width, int height);
-
-	bool isCursorEnabled;
-	GLFWwindow* getWindow();
+	GLFWwindow * GetWindow();
+	void Clear();
+	bool WindowActive();
+	void Swap();
+	void Initialization(int width, int height);
 
 private:
-	GLFWwindow* window;
+	GLFWwindow * window;
 };
-

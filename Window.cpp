@@ -1,51 +1,66 @@
-#include "stdafx.h"
 #include "Window.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm\gtx\transform.hpp>
-#include <iostream>
 
 Window::Window()
 {
+
 }
 
-
-Window::~Window()
+void Window::Initialization(int width, int height)
 {
-}
+	/* Initialize the library */
+	if (!glfwInit()) {
+		return;
+	}
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-GLFWwindow* Window::getWindow()
-{
-	return window;
-}
-
-int Window::init(int width, int height)
-{
-	if (!glfwInit())
-		return -1;
-
-	window = glfwCreateWindow(width, height, "Hello 3D!", nullptr, nullptr);
-
-	if(window == nullptr)
+	/* Create a windowed mode window and its OpenGL context */
+	window = glfwCreateWindow(width, height, "OpenGL", NULL, NULL);
+	if (!window)
 	{
-		std::cout << "Failed to create a window." << std::endl;
+		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
-		return -1;
+		return;
 	}
 
+	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
+	//	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	/* glad: load all OpenGL function pointers */
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
+		return;
 	}
-
 	glViewport(0, 0, width, height);
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	isCursorEnabled = true;
-	glEnable(GL_DEPTH_TEST);
 
-	return true;
+
+	glEnable(GL_DEPTH_TEST);
 }
+
+void Window::Clear()
+{
+	glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+bool Window::WindowActive()
+{
+	return !glfwWindowShouldClose(window);
+}
+
+void Window::Swap()
+{
+	glfwSwapBuffers(window);
+	glfwPollEvents();
+}
+
+GLFWwindow * Window::GetWindow()
+{
+	return this->window;
+}
+;

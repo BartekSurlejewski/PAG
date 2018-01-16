@@ -1,92 +1,82 @@
-#include "stdafx.h"
 #include "Camera.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(GLuint programHandle, Window* window)
+Camera::Camera()
 {
-	cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
-	cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	view = glm::mat4(1.0f);
+	// set default values
+	position = glm::vec3(0.f, 0.f, 3.f);
+	upVector = glm::vec3(0.f, 1.f, 0.f);
+	frontVector = glm::vec3(0.f, 0.f, -1.f);
 
-	/*Set projection matrix*/
-	glfwGetWindowSize(window->getWindow(), &width, &height);
-	projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(90.0f), (float)width / (float)height, 0.1f, 100.0f);
+	yaw = -90.f;
+	pitch = 0.0f;
+
+	aspectRatio = 16.f / 9.f; // ~1.777778
+	UpdatePerspectiveMatrix();
 }
 
-Camera::~Camera()
+void Camera::SetAspectRatio(float newAspectRatio)
 {
+	aspectRatio = newAspectRatio;
+	UpdatePerspectiveMatrix();
 }
 
-void Camera::update(GLuint programHandle, Window* window, GLfloat deltaTime)
+void Camera::UpdateOrientation()
 {
-	/*View matrix*/
-	this->deltaTime = deltaTime;
-	view = glm::mat4(1.0f);
-	view = glm::lookAt(	cameraPos,					// camera position in world space
-						cameraPos + cameraFront,	// at this point camera is looking
-						cameraUp);					// head is up
-
-	world = glm::mat4(1.0f);
-
-	projection = glm::perspective(45.0f, (float)width / (float)height, 0.001f, 1000.0f);
-	WVP = projection * view * world;
-
-	GLuint wvpLoc = glGetUniformLocation(programHandle, "wvp");
-	glUniformMatrix4fv(wvpLoc, 1, GL_FALSE, glm::value_ptr(WVP));
-}
-
-void Camera::processKeyboard(int key)
-{
-	GLfloat velocity = movementSpeed * deltaTime;
-
-	if (key == GLFW_KEY_W)
 	{
-		cameraPos += velocity * cameraFront;
-	}
-	else if (key == GLFW_KEY_S)
-	{
-		cameraPos -= velocity * cameraFront;
-	}
-	else if (key == GLFW_KEY_A)
-	{
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *  velocity;
-	}
-	else if (key == GLFW_KEY_D)
-	{
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *  velocity;
+		if (pitch > 89.0f)
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+
+		glm::vec3 front;
+		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		front.y = sin(glm::radians(pitch));
+		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		frontVector = glm::normalize(front);
+
+		UpdatePerspectiveMatrix();
 	}
 }
 
-//void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
-//{
-//	xoffset *= mouseSensitivity;
-//	yoffset *= mouseSensitivity;
-//
-//	yaw += xoffset;
-//	pitch += yoffset;
-//
-//	if (constrainPitch)
-//	{
-//		if (pitch > 89.0f)
-//			pitch = 89.0f;
-//		if (pitch < -89.0f)
-//			pitch = -89.0f;
-//	}
-//
-//	updateVectors();
-//}
-
-void Camera::updateVectors()
+void Camera::processInput(GLFWwindow* window, float dt)
 {
-	if (pitch > 89.0f)
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
+	float cameraSpeed = 20.0f * dt;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		position += cameraSpeed * frontVector;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		position -= cameraSpeed * frontVector;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		position -= glm::normalize(glm::cross(frontVector, upVector)) * cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		position += glm::normalize(glm::cross(frontVector, upVector)) * cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		position.y += cameraSpeed * 2;
+	}
+	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+	{
+		position.y -= cameraSpeed * 2;
+	}
 
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(front);
+	//glm::mat4
+	view = glm::lookAt(position, position + frontVector, upVector);
+
+}
+
+
+
+void Camera::UpdatePerspectiveMatrix()
+{
+	projection = glm::perspective(glm::radians(75.f), aspectRatio, 0.1f, 200.f);
 }

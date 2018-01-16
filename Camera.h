@@ -1,31 +1,41 @@
-#include <glm/glm.hpp>
-#include <glad/glad.h>
-#include <glm\gtx\transform.hpp>
-#include <glm\gtc\type_ptr.hpp>
-#include "Window.h"
+#include "glm/glm.hpp"
 
-#pragma once
+class GLFWwindow;
+
 class Camera
 {
 public:
-	Camera(GLuint, Window*);
-	~Camera();
-	void update(GLuint, Window*, GLfloat);
-	void updateVectors();
-	void processKeyboard(int);
-	void processMouseMovement(float, float, GLboolean);
+	Camera();
 
-	GLfloat yaw = -90.0f;
-	GLfloat pitch = 0.0f;
-	glm::mat4 world, view, projection, WVP;
-	glm::vec3 cameraPos;
+	void SetAspectRatio(float newAspectRatio);
+
+	glm::vec3 GetPosition() const { return position; }
+	void SetPosition(glm::vec3 positionCam) { position = positionCam; }
+
+	void processInput(GLFWwindow* window, float dt);
+
+	void UpdatePerspectiveMatrix();
+
+	float GetYaw() const { return yaw; }
+	void SetYaw(float y) { yaw = y; }
+
+	float GetPitch() const { return pitch; }
+	void SetPitch(float p) { pitch = p; }
+
+	void UpdateOrientation();
+
+	glm::mat4 view;
+	glm::mat4 projection;
 
 private:
-	int height, width;
-	glm::vec3 cameraFront, cameraUp;
+	glm::vec3 position;
+	glm::vec3 upVector;
+	glm::vec3 frontVector;
 
-	GLfloat deltaTime;
-	GLfloat movementSpeed = 4.0f;
-	GLfloat mouseSensitivity = 0.1f;
+	float aspectRatio;
+
+	// orientation
+	float yaw;
+	float pitch;
+
 };
-

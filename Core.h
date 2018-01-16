@@ -1,32 +1,45 @@
-#include "Window.h"
-#include "Shader.h"
-#include "Texture.h"
-#include "Transform.h"
-#include "Camera.h"
-#include "Shader.h"
-#include "GraphNode.h"
-#include "Model.h"
-#include "Scene.h"
-
 #pragma once
+#define GLFW_INCLUDE_NONE
+
+#include "Window.h"
+#include "Camera.h"
+#include "Transform.h"
+#include "Model.h"
+#include <AntTweakBar/AntTweakBar.h>
+
+class DirectionalLight;
+class PointLight;
+class SpotLight;
+
 class Core
 {
 public:
-	Core(Window*, Camera*, Shader);
-	~Core();
-	void update(GLuint, Shader);
+	Core();
+	bool Initialize();
+	void Update();
 
-	TwBar* barHierarchy;
+	Camera* GetCamera() { return &camera; }
+	TwBar* bar;
+	TwBar* barLighting;
+	Model model, model2, plane;
 
-	Window* screen;
-	Camera* camera;
-	Scene* scene;
+	Window window;
+	Shader shader;
+	Shader shaderSphere;
+	Model modelSphere;
+	bool canMoveCamera;
+
+	DirectionalLight* directionalLight = nullptr;
+	PointLight* pointLight = nullptr;
+	SpotLight* spotLight = nullptr;
+
 
 private:
-	void processInput(GLFWwindow*);
-	//void processMouseMovement();
+	void processInputCore(GLFWwindow* window, float dt);
+	void Render();
+	void SetLights();
 
-	GLdouble xpos, ypos;
-	GLfloat lastX = 500, lastY = 320;
+	Camera camera;
+
+	float lastTime;
 };
-

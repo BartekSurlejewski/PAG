@@ -1,59 +1,57 @@
-#include "stdafx.h"
 #include "Core.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtx/intersect.hpp>
-#include <AntTweakBar/AntTweakBar.h>
-#include <string>
-#include <iostream>
 
-Core* pCore = nullptr;
+#include "DirectionalLight.h"
+#include "PointLight.h"
+#include "SpotLight.h"
 
-Camera* globalCamera = nullptr;
+Core* core = nullptr;
+
 float xOffset = 0.0f;
 float yOffset = 0.0f;
-bool isCursorEnabled;
 
-int sUnProject(float winx, float winy, float winz, const glm::mat4& matInvViewProj, const int viewport[4], float* objx, float* objy, float* objz)
+bool directionalLightOn = true;
+bool pointLightOn = true;
+bool spotLightOn = true;
+
+int UnProject(float winX, float winY, float winZ, const glm::mat4& matViewProjection, const int viewport[4], float* objX, float* objY, float* objZ)
 {
-	glm::vec4 vIn;
-	vIn.x = (winx - viewport[0]) * 2 / viewport[2] - 1.0f;
-	vIn.y = (winy - viewport[1]) * 2 / viewport[3] - 1.0f;
-	vIn.z = winz;
-	vIn.w = 1.f;
+	glm::vec4 in;
+	in.x = (winX - viewport[0]) * 2 / viewport[2] - 1.0f;
+	in.y = (winY - viewport[1]) * 2 / viewport[3] - 1.0f;
+	in.z = winZ;
+	in.w = 1.0f;
 
-	glm::vec4 vOut = vIn*matInvViewProj;
+	glm::vec4 out = in * matViewProjection;
 
-	if (vOut.w == 0.0f)
+	if (out.w == 0.0f)
 	{
 		return 0;
 	}
-
-	*objx = vOut.x / vOut.w;
-	*objy = vOut.y / vOut.w;
-	*objz = vOut.z / vOut.w;
+	*objX = out.x / out.w;
+	*objY = out.y / out.w;
+	*objZ = out.z / out.w;
 
 	return 1;
 }
 
-struct SRay
+struct Ray
 {
-	glm::vec3 orig;
-	glm::vec3 dir;
+	glm::vec3 origin;
+	glm::vec3 direction;
 };
 
-//------------------------------------------------------------------------
-// https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
-//------------------------------------------------------------------------
-bool Intersect(const SRay& r, const glm::vec3& min, const glm::vec3& max)
+bool Intersect(const Ray& r, const glm::vec3& min, const glm::vec3& max)
 {
-	float tmin = (min.x - r.orig.x) / r.dir.x;
-	float tmax = (max.x - r.orig.x) / r.dir.x;
+	float tmin = (min.x - r.origin.x) / r.direction.x;
+	float tmax = (max.x - r.origin.x) / r.direction.x;
 
 	if (tmin > tmax) std::swap(tmin, tmax);
 
-	float tymin = (min.y - r.orig.y) / r.dir.y;
-	float tymax = (max.y - r.orig.y) / r.dir.y;
+	float tymin = (min.y - r.origin.y) / r.direction.y;
+	float tymax = (max.y - r.origin.y) / r.direction.y;
 
 	if (tymin > tymax) std::swap(tymin, tymax);
 
@@ -66,8 +64,8 @@ bool Intersect(const SRay& r, const glm::vec3& min, const glm::vec3& max)
 	if (tymax < tmax)
 		tmax = tymax;
 
-	float tzmin = (min.z - r.orig.z) / r.dir.z;
-	float tzmax = (max.z - r.orig.z) / r.dir.z;
+	float tzmin = (min.z - r.origin.z) / r.direction.z;
+	float tzmax = (max.z - r.origin.z) / r.direction.z;
 
 	if (tzmin > tzmax) std::swap(tzmin, tzmax);
 
@@ -83,12 +81,12 @@ bool Intersect(const SRay& r, const glm::vec3& min, const glm::vec3& max)
 	return true;
 }
 
-int UnprojectFromScreen(float sX, float sY, float sZ, float* pX, float* pY, float* pZ, const glm::mat4& world)
+int UnprojectFromScreen(float x1, float y1, float z1, float* x2, float* y2, float* z2, const glm::mat4& world)
 {
 	float modelMatrix[16];
 	float viewMatrix[16];
-	float projMatrix[16];
-	float invViewProjMatrix[16];
+	float projectionMatrix[16];
+	float invViewProjectionMatrix[16];
 
 	int viewport[4];
 	viewport[0] = 0;
@@ -96,73 +94,49 @@ int UnprojectFromScreen(float sX, float sY, float sZ, float* pX, float* pY, floa
 	viewport[2] = 1280;
 	viewport[3] = 720;
 
-	glm::mat4 matView = pCore->camera->view;
-	glm::mat4 matProj = pCore->camera->projection;
-
-
+	glm::mat4 matView = core->GetCamera()->view;
+	glm::mat4 matProj = core->GetCamera()->projection;
 	glm::mat4 matWorld = glm::transpose(world);
 	matView = glm::transpose(matView);
 	matProj = glm::transpose(matProj);
+	glm::mat4 matViewProj = matWorld * matView * matProj;
+	glm::mat4 invMatViewProj = glm::inverse(matViewProj);
 
-	glm::mat4 matViewProj = matView * matProj;
-	glm::mat4 matInvViewProj = glm::inverse(matViewProj);
+	memcpy(invViewProjectionMatrix, &invMatViewProj, 16 * sizeof(float));
 
-	memcpy(invViewProjMatrix, &matInvViewProj, 16 * sizeof(float));
-
-	return sUnProject(sX, sY, sZ, matInvViewProj, viewport, pX, pY, pZ);
+	return UnProject(x1, y1, z1, invMatViewProj, viewport, x2, y2, z2);
 }
 
-
-//------------------------------------------------------------------------
 glm::vec3 UnprojectFromScreen(int x, int y, const glm::mat4& world)
 {
-	glm::vec3 vDir, vCenter;
+	glm::vec3 dir, center;
 
-	UnprojectFromScreen((float)x, (float)y, 0.f, &vCenter.x, &vCenter.y, &vCenter.z, world);
-	UnprojectFromScreen((float)x, (float)y, 1.f, &vDir.x, &vDir.y, &vDir.z, world);
+	UnprojectFromScreen((float)x, (float)y, 0.f, &center.x, &center.y, &center.z, world);
+	UnprojectFromScreen((float)x, (float)y, 1.f, &dir.x, &dir.y, &dir.z, world);
 
 	char chBuffer[256];
-	sprintf_s(chBuffer, "Vec0: %f, %f, %f\nVec1:%f, %f, %f\nCameraPos: %f, %f, %f\n\n", vCenter.x, vCenter.y, vCenter.z, vDir.x, vDir.y, vDir.z, pCore->camera->cameraPos.x,
-		pCore->camera->cameraPos.y, pCore->camera->cameraPos.z
+	sprintf_s(chBuffer, "Vec0: %f, %f, %f\nVec1:%f, %f, %f\nCameraPos: %f, %f, %f\n\n", center.x, center.y, center.z, dir.x, dir.y, dir.z, core->GetCamera()->GetPosition().x,
+		core->GetCamera()->GetPosition().y, core->GetCamera()->GetPosition().z
 	);
-	//OutputDebugStringA(chBuffer);
 
-
-	return glm::normalize(vDir - vCenter);
-
+	return glm::normalize(dir - center);
 }
 
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	if(!TwEventMousePosGLFW((int)xpos, (int)ypos))
-	{
-		static float lastX = 1000 / 2;
-		static float lastY = 640 / 2;
+	glViewport(0, 0, width, height);
 
-		xOffset = xpos - lastX;
-		yOffset = lastY - ypos;
-
-		lastX = xpos;
-		lastY = ypos;
-		float sensitivity = 0.05;
-		xOffset *= sensitivity;
-		yOffset *= sensitivity;
-
-		globalCamera->yaw += xOffset;
-		globalCamera->pitch += yOffset;
-		globalCamera->updateVectors();
-	}
+	TwWindowSize(width, height);
 }
 
-void make_list(GraphNode* pNode, std::vector<GraphNode*>& nodesList)
+void make_list(SceneNode* node, std::vector<SceneNode*>& nodesList)
 {
-	for (unsigned int i = 0; i < pNode->children.size(); ++i)
+	for (int i = 0; i < node->children.size(); ++i)
 	{
-		GraphNode* pChild = pNode->children[i];
-		nodesList.push_back(pChild);
+		SceneNode* child = node->children[i];
+		nodesList.push_back(child);
 
-		make_list(pChild, nodesList);
+		make_list(child, nodesList);
 	}
 }
 
@@ -170,194 +144,373 @@ void mouse_button(GLFWwindow* window, int button, int x, int y)
 {
 	TwEventMouseButtonGLFW(button, x);
 
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && x==0)
+	if (button == GLFW_MOUSE_BUTTON_RIGHT)
 	{
-		if(isCursorEnabled)
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		else
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
-		isCursorEnabled = !isCursorEnabled;
+		core->canMoveCamera = true;
 	}
-	
-	if (button == GLFW_MOUSE_BUTTON_LEFT && x == 1)
+	else
 	{
-		glm::vec3 vCameraPos = pCore->camera->cameraPos;
+		core->canMoveCamera = false;
+	}
 
-		SRay ray;
-		ray.orig = vCameraPos;
+	if (button == GLFW_MOUSE_BUTTON_LEFT && x == 0)
+	{
+		glm::vec3 cameraPos = core->GetCamera()->GetPosition();
+
+		Ray ray;
+		ray.origin = cameraPos;
 
 		// intersect test
-		std::vector<GraphNode*> sceneNodes;
-		make_list(pCore->scene->rootNode, sceneNodes);
+		std::vector<SceneNode*> sceneNodes;
+		make_list(core->model.graph.rootNode, sceneNodes);
 
 		bool bIntersect = false;
 
-		// remove all vars from anttweakbar's window
-		TwRemoveAllVars(pCore->barHierarchy);
+		TwRemoveAllVars(core->bar);
 
-		for (unsigned int i = 0; i < sceneNodes.size(); ++i)
+		for (int i = 0; i < sceneNodes.size(); ++i)
 		{
-			// Process only Models
-			//if (sceneNodes[i]->GetNodeType() != ENodeType_Model)
-			//{
-			//	continue;
-			//}
-
-
-			GraphNode* pModelNode = sceneNodes[i];
-
-			if (pModelNode->meshes.size() > 0)
+			if (sceneNodes[i]->nodeType != Type_Model)
 			{
+				continue;
+			}
+			ModelNode* modelNode = (ModelNode*)(sceneNodes[i]);
 
+			const glm::mat4& world = modelNode->combinedXForm;
 
-				glm::vec3 vAABBMin, vAABBMax;
-				pModelNode->GetAABB(vAABBMin, vAABBMax);
+			glm::vec4 boundaryMin = glm::vec4(modelNode->boundingBoxMin, 1.0f);
+			glm::vec4 boundaryMax = glm::vec4(modelNode->boundingBoxMax, 1.0f);
+			boundaryMin = world * boundaryMin;
+			boundaryMax = world * boundaryMax;
 
-				//const glm::mat4& world = sceneNodes[i]->combinedXform;
-				const glm::mat4& world = glm::mat4(1.0f);
+			double xPos, yPos;
+			glfwGetCursorPos(window, &xPos, &yPos);
 
+			glm::vec3 direction = UnprojectFromScreen((int)xPos, (int)yPos, world);
+			ray.direction = direction;
 
-				glm::vec4 aabbMin = glm::vec4(vAABBMin, 1.0f);
-				glm::vec4 aabbMax = glm::vec4(vAABBMax, 1.0f);
-				aabbMin = world * aabbMin;
-				aabbMax = world * aabbMax;
+			// Sphere
+			glm::vec4 sphereCenter = glm::vec4(modelNode->boundingSphereCenter, 1.0f);
 
-				double xPos, yPos;
-				glfwGetCursorPos(window, &xPos, &yPos);
+			glm::mat4 matScaleUnitSphere;
+			matScaleUnitSphere = glm::scale(matScaleUnitSphere, glm::vec3(modelNode->boundingSphereRadius));
 
+			sphereCenter = world * sphereCenter;
+			float sphereCenterSqared = powf(modelNode->boundingSphereRadius, 2.5f);
 
-				glm::vec3 vDirection = UnprojectFromScreen((int)xPos, (int)yPos, world);
-				ray.dir = vDirection;
+			glm::vec3 sphereCenterXYZ = glm::vec3(sphereCenter.x, sphereCenter.y, sphereCenter.z);
 
-				// Sphere
-				glm::vec4 sphereCenter = glm::vec4(pModelNode->boundingSphereCenter, 1.0f);
-				sphereCenter = world * sphereCenter;
+			float dist = 0;
+			bIntersect = glm::intersectRaySphere(ray.origin, ray.direction, sphereCenterXYZ, sphereCenterSqared, dist);
 
-				char chBuffer[256];
-				sprintf_s(chBuffer, "%f %f %f\n", sphereCenter.x, sphereCenter.y, sphereCenter.z);
-				OutputDebugStringA(chBuffer);
+			if (bIntersect == true)
+			{
+				char ch[32];
+				sprintf_s(ch, "intersect %d\n", i);
+				OutputDebugStringA(ch);
 
-				float sphereCenterSqared = powf(pModelNode->boundingSphereRadius * sceneNodes[i]->local.scale.x, 2.f);
+				ModelNode* pIntersectedNode = modelNode;
+				pIntersectedNode->color = glm::vec4(5.0f, 0.0f, 0.0f, 1.0f);
 
-				glm::vec3 sphereCenterXYZ = glm::vec3(sphereCenter.x, sphereCenter.y, sphereCenter.z);
+				char buf[64];
+				sprintf_s(buf, "Group=%s step=0.1", pIntersectedNode->name.c_str());
 
-				float dist = 0;
-				//bIntersect = glm::intersectRaySphere(ray.orig, ray.dir, sphereCenterXYZ, sphereCenterSqared, dist);
+				TwAddVarRW(core->bar, std::string("translate x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.x, buf);
+				TwAddVarRW(core->bar, std::string("translate y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.y, buf);
+				TwAddVarRW(core->bar, std::string("translate z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.z, buf);
 
-				bIntersect = Intersect(ray, aabbMin, aabbMax);
+				TwAddVarRW(core->bar, std::string("scale x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.x, buf);
+				TwAddVarRW(core->bar, std::string("scale y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.y, buf);
+				TwAddVarRW(core->bar, std::string("scale z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.z, buf);
 
-				if (bIntersect == true)
-				{
-					char ch[32];
-					sprintf_s(ch, "intersect %d\n", i);
-					OutputDebugStringA(ch);
+				TwAddVarRW(core->bar, std::string("rotate x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.x, buf);
+				TwAddVarRW(core->bar, std::string("rotate y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.y, buf);
+				TwAddVarRW(core->bar, std::string("rotate z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.z, buf);
 
-
-					//pModelNode->emissiveColor = Vec3(0.5, 0.5, 0.8);
-
-					char buf[64];
-					//sprintf_s(buf, "Group=%s step=0.1", pModelNode->m_name.c_str());
-
-					//std::string paramName = std::to_string(i++);
-
-					TwAddVarRW(pCore->barHierarchy, "translate x", TW_TYPE_FLOAT, &pModelNode->local.translation.x, buf);
-					TwAddVarRW(pCore->barHierarchy, "translate y", TW_TYPE_FLOAT, &pModelNode->local.translation.y, buf);
-					TwAddVarRW(pCore->barHierarchy, "translate z", TW_TYPE_FLOAT, &pModelNode->local.translation.z, buf);
-
-					TwAddVarRW(pCore->barHierarchy, "scale x", TW_TYPE_FLOAT, &pModelNode->local.scale.x, buf);
-					TwAddVarRW(pCore->barHierarchy, "scale y", TW_TYPE_FLOAT, &pModelNode->local.scale.y, buf);
-					TwAddVarRW(pCore->barHierarchy, "scale z", TW_TYPE_FLOAT, &pModelNode->local.scale.z, buf);
-
-					TwAddVarRW(pCore->barHierarchy, "rotate x", TW_TYPE_FLOAT, &pModelNode->local.rotation.x, buf);
-					TwAddVarRW(pCore->barHierarchy, "rotate y", TW_TYPE_FLOAT, &pModelNode->local.rotation.y, buf);
-					TwAddVarRW(pCore->barHierarchy, "rotate z", TW_TYPE_FLOAT, &pModelNode->local.rotation.z, buf);
-					/*float asd = 0;
-					TwAddVarRW(pCore->barHierarchy, "rotate x", TW_TYPE_FLOAT, &asd, buf);*/
-				}
-				else
-				{
-					//pModelNode->emissiveColor = Vec3(0, 0, 0);
-				}
+			}
+			else
+			{
+				modelNode->color = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 			}
 		}
 	}
 }
 
-Core::Core(Window* window, Camera* camera, Shader shader)
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	pCore = this;
+	static float lastX = 1280 / 2;
+	static float lastY = 720 / 2;
 
-	globalCamera = camera;
-	this->screen = window;
-	this->camera = camera;	
-	scene = new Scene(&shader);
-	isCursorEnabled = window->isCursorEnabled;
 
-	glfwSetCursorPosCallback(window->getWindow(), mouse_callback);
-	glfwSetMouseButtonCallback(window->getWindow(), mouse_button);
+	xOffset = xpos - lastX;
+	yOffset = lastY - ypos;
 
-	barHierarchy = TwNewBar("hierarchy");
+	lastX = xpos;
+	lastY = ypos;
+	float sensitivity = 0.5;
+	xOffset *= sensitivity;
+	yOffset *= sensitivity;
 
-	glm::mat4 transform = glm::mat4(1.0f);
-	GLuint transformLoc = glGetUniformLocation(shader.programHandle, "transform");
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-}
-
-Core::~Core()
-{
-}
-
-void Core::processInput(GLFWwindow *window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-
-	else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera->processKeyboard(GLFW_KEY_W);
-	else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera->processKeyboard(GLFW_KEY_S);
-	else if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera->processKeyboard(GLFW_KEY_A);
-	else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera->processKeyboard(GLFW_KEY_D);
-	//glfwGetCursorPos(window, &xpos, &ypos);
-}
-
-void Core::update(GLuint programHandle, Shader shader)
-{
-	GLFWwindow* window = screen->getWindow();
-	GLfloat deltaTime = 0.0f;
-	GLfloat lastFrame = 0.0f;
-
-	while (!glfwWindowShouldClose(window))
+	if (core->canMoveCamera)
 	{
-		glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Camera* camera = core->GetCamera();
 
-		GLfloat currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		camera->SetYaw(camera->GetYaw() + xOffset);
+		camera->SetPitch(camera->GetPitch() + yOffset);
+		camera->UpdateOrientation();
+	}
 
-		processInput(window);
-		camera->update(programHandle, screen, deltaTime);
-		shader.use();
+	TwEventMousePosGLFW((int)xpos, (int)ypos);
+}
 
-		scene->Render();
+Core::Core()
+{
 
-		TwDraw();
+}
 
-		glfwSwapBuffers(window);
+bool Core::Initialize()
+{
+	if (!glfwInit())
+	{
+		return false;
+	}
+
+	core = this;
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+
+	window.Initialization(1280, 720);
+
+	camera.SetAspectRatio(1280.f / 720.f);
+	camera.SetPosition(glm::vec3(0.0f, 2.0f, 30.0f));
+
+	glfwMakeContextCurrent(window.GetWindow());
+	glfwSetFramebufferSizeCallback(window.GetWindow(), framebuffer_size_callback);
+
+	//glfwSetInputMode( m_window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+	glfwSetCursorPosCallback(window.GetWindow(), mouse_callback);
+
+	glfwSetMouseButtonCallback(window.GetWindow(), mouse_button);
+
+
+	// Initialize GLAD
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		return false;
+	}
+
+
+	// Init AntTweakBar
+	TwInit(TW_OPENGL_CORE, nullptr);
+
+	bar = TwNewBar("Hierarchy");
+	TwWindowSize(1280, 720);
+	TwDefine(" Hierarchy position='1060 20' ");
+
+	SetLights();
+
+	barLighting = TwNewBar("Lighting");
+	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &directionalLight->GetDirection(), "Group=Directional");
+
+	TwAddVarRW(barLighting, "Const", TW_TYPE_FLOAT, &pointLight->GetAttenuation().x, "Group=Point");
+	TwAddVarRW(barLighting, "Linear", TW_TYPE_FLOAT, &pointLight->GetAttenuation().y, "Group=Point step=0.001 min=0");
+	TwAddVarRW(barLighting, "Quadratic", TW_TYPE_FLOAT, &pointLight->GetAttenuation().z, "Group=Point step=0.0001 min=0");
+
+	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &spotLight->GetDirection(), "Group=Spot");
+	TwAddVarRW(barLighting, "Position", TW_TYPE_DIR3F, &spotLight->GetPosition(), "Group=Spot");
+
+	// set inital viewport
+	glViewport(0, 0, 1280, 720);
+
+	// INITIALIZE MESH DATA
+	float vertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+
+	std::vector<Vertex> verts;
+	for (int i = 0; i < 36; ++i)
+	{
+		int offset = i * 5;
+
+		Vertex v;
+		v.Position = glm::vec3(vertices[offset], vertices[offset + 1], vertices[offset + 2]);
+		v.TexCoords = glm::vec2(vertices[offset + 3], vertices[offset + 4]);
+		verts.push_back(v);
+	}
+
+	glEnable(GL_DEPTH_TEST);
+
+	std::vector<unsigned int> indices;
+
+	model.LoadModel("Models/Hierarchia.3ds");
+	model2.LoadModel("Models/Nanosuit/nanosuit.obj");
+	plane.LoadModel("Models/plane/plane.obj");
+
+	shader = Shader("Shaders/shader.vert", "Shaders/shader.frag");
+
+	return true;
+}
+
+void Core::Update()
+{
+	while (!glfwWindowShouldClose(window.GetWindow()))
+	{
+		float currentTime = glfwGetTime();
+		float delta = currentTime - lastTime;
+		lastTime = currentTime;
+
+		processInputCore(window.GetWindow(), delta);
+
+
+		Render();
+
+		glfwSwapBuffers(window.GetWindow());
 		glfwPollEvents();
 	}
+
+	glfwTerminate();
 }
 
-//void Core::processMouseMovement()
-//{
-//	GLfloat xoffset = xpos - lastX;
-//	GLfloat yoffset = lastY - ypos;
-//
-//	lastX = xpos;
-//	lastY = ypos;
-//	camera->processMouseMovement(xoffset, yoffset, true);
-//}
+void Core::processInputCore(GLFWwindow* pWindow, float delta)
+{
+	if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE))
+	{
+		glfwSetWindowShouldClose(pWindow, true);
+	}
+	if (glfwGetKey(pWindow, GLFW_KEY_T) == GLFW_PRESS)
+	{
+		directionalLightOn = !directionalLightOn;
+	}
+
+	camera.processInput(pWindow, delta);
+}
+
+void Core::Render()
+{
+	glClearColor(0.8f, 0.7f, 0.5f, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	shader.UseProgram();
+
+	shader.SetMat4("view", camera.view);
+	shader.SetMat4("projection", camera.projection);
+	shader.SetVec3("cameraPosition", camera.GetPosition());
+
+	Material modelMaterial;
+	modelMaterial.specFactor = 10;
+	modelMaterial.SetSimple(shader);
+
+	Transform lightTransform;
+	directionalLight->Draw(lightTransform, &shader);
+
+	glm::vec3 pos;
+	pos.y = 0.0f;
+	pos.x = 20 * sinf(glfwGetTime() * 0.5);
+	pos.z = 20 * cosf(glfwGetTime() * 0.5);
+	pointLight->SetPosition(pos);
+	pointLight->Draw(lightTransform, &shader);
+
+	spotLight->Draw(lightTransform, &shader);
+
+	for (int x = 0; x <= 2; x++)
+	{
+		for (int z = 1; z <= 3; z++)
+		{
+			Transform trans;
+			trans.translate = glm::vec3((float)x * 10, 0.0f, (float)z * -10);
+			trans.CalculateWorldMatrix();
+
+			shader.SetMat4("model", trans.worldMatrix);
+			model2.Draw(shader);
+		}
+	}
+
+	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+	modelMaterial.specFactor = 64;
+	modelMaterial.SetSimple(shader);
+
+	model.DrawAsGraph(shader);
+
+	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+	modelMaterial.specFactor = 20;
+	modelMaterial.SetSimple(shader);
+
+	Transform trans;
+	trans.translate = glm::vec3(0.0f, -100.0f, 0.0f);
+	trans.CalculateWorldMatrix();
+
+	shader.SetMat4("model", trans.worldMatrix);
+	plane.Draw(shader);
+
+	TwDraw();
+
+	return;
+}
+
+void Core::SetLights()
+{
+	directionalLight = new DirectionalLight();
+
+	Material matDirectional;
+	matDirectional.ambient = glm::vec3(1.0f, 0.0f, 0.0f);
+	matDirectional.specular = glm::vec3(1.0f, 0.0f, 0.0f);
+	directionalLight->SetMaterial(matDirectional);
+
+	// point light
+	pointLight = new PointLight();
+
+	Material matPoint;
+	matPoint.ambient = matPoint.specular = matPoint.diffuse = glm::vec3(0.0f, 1.0f, 0.0f);
+	pointLight->SetMaterial(matPoint);
+
+
+	// spot light
+	spotLight = new SpotLight();
+
+	Material matSpot;
+	matSpot.ambient = matSpot.specular = matSpot.diffuse = glm::vec3(0.0f, 0.0f, 1.0f);
+	spotLight->SetMaterial(matSpot);
+}

@@ -1,62 +1,29 @@
-#include "Mesh.h"
-#include "Shader.h"
-#include "Texture.h"
-#include <vector>
-
-#include <glad/glad.h> 
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <stb_image.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include "GraphNode.h"
-#include "Texture.h"
-#include "Transform.h"
-
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <map>
-#include <vector>
-#include "GraphNode.h"
-
 #pragma once
+
+#include "Mesh.h"
+#include "ModelNode.h"
+
+struct aiNode;
+struct aiScene;
+struct aiMesh;
+struct aiMaterial;
+enum aiTextureType;
 
 class Model
 {
 public:
-	vector<Texture> textures_loaded;
-	vector<Mesh> meshes;
-	vector<Model*> nodes;
-	string directory;
-	
+	Model();
+	void LoadModel(const std::string& path);
+	void Draw(Shader& shader);
+	void DrawAsGraph(Shader& shader);
 
-	Model::Model(string const &path, GraphNode* rootNode, bool gamma = false) : gammaCorrection(gamma)
-	{
-		loadModel(path, rootNode);
-	}
+	SceneGraph graph;
 
-	Model::~Model()
-	{
-	}
-
-	void Render(Shader* shader);
-	void SetNode(Model* node);
-	void SetTransform(Transform);
-
-	void Draw(Shader* shader);
 private:
-	Texture* texture;
-	Transform transform;
-	bool gammaCorrection;
+	void processNode(aiNode* node, const aiScene* scene, ModelNode* sceneNode);
+	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+	std::vector<MeshTexture> loadMaterialTextures(aiMaterial* material, aiTextureType type, const std::string& typeName);
 
-	void loadModel(string path, GraphNode*);
-	void processNode(aiNode *node, const aiScene *scene, GraphNode*);
-	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-	vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
-	unsigned int TextureFromFile(const char *path, const string &directory);
+	std::vector<Mesh> meshes;
+	std::string directory;
 };
-

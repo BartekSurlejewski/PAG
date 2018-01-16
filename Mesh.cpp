@@ -1,96 +1,94 @@
-//#include "stdafx.h"
-//#include <glad/glad.h>
-//#include <glm/glm.hpp>
-//#include <glm\gtx\transform.hpp>
-//#include "Mesh.h"
-//
-//Mesh::Mesh()
-//{
-//	loadContent(1);
-//}
-//
-//
-//Mesh::~Mesh()
-//{
-//}
-//
-//GLfloat vertices[] = {	//Positions			//Texture
-//						-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-//						0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-//						0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-//						0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-//						-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-//						-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-//
-//						-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-//						0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-//						0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-//						0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-//						-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-//						-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-//
-//						-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-//						-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-//						-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-//						-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-//						-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-//						-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-//
-//						0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-//						0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-//						0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-//						0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-//						0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-//						0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-//
-//						-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-//						0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-//						0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-//						0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-//						-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-//						-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-//
-//						-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-//						0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-//						0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-//						0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-//						-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-//						-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-//};
-//
-// glm::vec3 Mesh::cubePositions[] = {
-//							glm::vec3(0.0f,  0.0f,  0.0f),
-//							glm::vec3(3.0f,  0.5f, -15.0f),
-//							glm::vec3(-2.5f, 1.0f, -2.5f),
-//							glm::vec3(-3.8f, -0.7f, -12.3f),
-//							glm::vec3(2.4f, -1.0f, -3.5f),
-//							glm::vec3(-1.7f,  0.0f, -7.5f),
-//							glm::vec3(7.3f, 0.0f, -2.5f),
-//							glm::vec3(2.5f,  0.6f, 2.5f),
-//							glm::vec3(5.5f,  0.0f, -1.5f),
-//							glm::vec3(-1.3f,  0.3f, -1.5f)
-//};
-//
-//int Mesh::loadContent(int objectsCounter)
-//{
-//	GLuint VBO = NULL;
-//	GLuint VAO = NULL;
-//
-//	glGenBuffers(objectsCounter, &VBO);
-//
-//	glGenVertexArrays(1, &VAO);
-//	glBindVertexArray(VAO);
-//
-//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-//
-//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
-//	glEnableVertexAttribArray(0);
-//
-//	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-//	glEnableVertexAttribArray(1);
-//
-//	glBindVertexArray(0);
-//
-//	return true;
-//}
+#include "Mesh.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+Mesh::Mesh()
+{
+}
+
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures)
+{
+	this->vertices = vertices;
+	this->indices = indices;
+	this->textures = textures;
+
+	// now that we have all the required data, set the vertex buffers and its attribute pointers.
+	SetupMesh();
+}
+
+void Mesh::SetBoundingBox(glm::vec3 & min, glm::vec3 & max)
+{
+	boudingBoxMin = min;
+	boudingBoxMax = max;
+}
+
+void Mesh::GetBoundingBox(glm::vec3 & min, glm::vec3 & max)
+{
+	min = boudingBoxMin;
+	max = boudingBoxMax;
+}
+
+void Mesh::Draw(Shader shader)
+{
+	// bind appropriate textures
+	unsigned int diffuseNr = 1;
+	unsigned int specularNr = 1;
+	for (unsigned int i = 0; i < textures.size(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+										  // retrieve texture number (the N in diffuse_textureN)
+		std::string number;
+		std::string name = textures[i].type;
+		if (name == "texture_diffuse")
+			number = std::to_string(diffuseNr++);
+		else if (name == "texture_specular")
+			number = std::to_string(specularNr++); // transfer unsigned int to stream
+												   // now set the sampler to the correct texture unit
+		glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+		// and finally bind the texture
+		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+	}
+	glActiveTexture(GL_TEXTURE0);
+
+
+	// draw mesh
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void Mesh::SetupMesh()
+{
+	// create buffers/arrays
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+	// load data into vertex buffers
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// A great thing about structs is that their memory layout is sequential for all its items.
+	// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
+	// again translates to 3/2 floats which translates to a byte array.
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+
+	// set the vertex attribute pointers
+	// vertex Positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+	// vertex normals
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+	// vertex texture coords
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+	glBindVertexArray(0);
+}
+
