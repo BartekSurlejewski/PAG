@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Transform.h"
 #include "Model.h"
+#include "Skybox.h"
 #include <AntTweakBar/AntTweakBar.h>
 
 class DirectionalLight;
@@ -42,6 +43,7 @@ private:
 	void renderCube();
 
 	Camera camera;
+	Skybox skybox;
 
 	glm::vec3 directionalLightPos;
 
@@ -52,4 +54,5 @@ private:
 	unsigned int quadVBO;
 	unsigned int cubeVAO = 0;
 	unsigned int cubeVBO = 0;
+	unsigned int skyboxVAO, skyboxVBO;
 };

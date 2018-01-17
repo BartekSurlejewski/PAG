@@ -4,16 +4,16 @@
 
 Skybox::Skybox()
 {
-	faces = {
-		"/Skyboxes/mp_blackgold/blackgold_rt.tga",
-		"/Skyboxes/mp_blackgold/blackgold_lf.tga",
-		"/Skyboxes/mp_blackgold/blackgold_up.tga",
-		"/Skyboxes/mp_blackgold/blackgold_dn.tga",
-		"/Skyboxes/mp_blackgold/blackgold_bk.tga",
-		"/Skyboxes/mp_blackgold/blackgold_ft.tga"
-	};
+	/*faces = {
+		"Skyboxes/mp_blackgold/blackgold_rt.tga",
+		"Skyboxes/mp_blackgold/blackgold_lf.tga",
+		"Skyboxes/mp_blackgold/blackgold_up.tga",
+		"Skyboxes/mp_blackgold/blackgold_dn.tga",
+		"Skyboxes/mp_blackgold/blackgold_bk.tga",
+		"Skyboxes/mp_blackgold/blackgold_ft.tga"
+	};*/
 
-	cubemapTexture = loadCubemap(faces);
+	//cubemapTexture = loadCubemap(faces);
 }
 
 
@@ -21,7 +21,7 @@ Skybox::~Skybox()
 {
 }
 
-unsigned int Skybox::loadCubemap(std::vector<std::string> faces)
+void Skybox::loadCubemap()
 {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -50,5 +50,5 @@ unsigned int Skybox::loadCubemap(std::vector<std::string> faces)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	return textureID;
+	cubemapTexture = textureID;
 }

@@ -312,7 +312,6 @@ bool Core::Initialize()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-
 	window.Initialization(1280, 720);
 
 	camera.SetAspectRatio(1280.f / 720.f);
@@ -397,6 +396,62 @@ bool Core::Initialize()
 		verts.push_back(v);
 	}
 
+	skybox.loadCubemap();
+
+	float skyboxVertices[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
+	};
+	
+	// skybox VAO
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
@@ -450,6 +505,10 @@ bool Core::Initialize()
 	shadowShader.UseProgram();
 	shadowShader.SetInt("diffuseTeture", 0);
 	shadowShader.SetInt("shadowMap", 1);
+
+	skyboxShader.UseProgram();
+	skyboxShader.SetInt("skybox", 0);
+
 	debugDepthShader.UseProgram();
 	debugDepthShader.SetInt("depthMap", 0);
 
@@ -519,6 +578,16 @@ void Core::Render()
 	//Render the scene normally
 	glViewport(0, 0, 1280, 720);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	/***SKYBOX DRAWING***/
+	glDepthMask(GL_FALSE);
+	skyboxShader.UseProgram();
+	skyboxShader.SetMat4("view", glm::mat4(glm::mat3(camera.view)));
+	skyboxShader.SetMat4("projection", camera.projection);
+	glBindVertexArray(skyboxVAO);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.cubemapTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDepthMask(GL_TRUE);
 
 	debugDepthShader.UseProgram();
 	debugDepthShader.SetFloat("near_plane", near_plane);
