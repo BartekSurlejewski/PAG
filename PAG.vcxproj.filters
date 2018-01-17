@@ -66,6 +66,9 @@
     <ClInclude Include="SpotLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -110,6 +113,9 @@
     <ClCompile Include="SpotLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader.frag">
@@ -134,6 +140,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\shadowShader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\skyboxShader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\skyboxShader.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

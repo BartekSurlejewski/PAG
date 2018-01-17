@@ -403,7 +403,7 @@ bool Core::Initialize()
 	std::vector<unsigned int> indices;
 
 	model.LoadModel("Models/Hierarchia.3ds");
-	model2.LoadModel("Models/Nanosuit/nanosuit.obj");
+	nanosuit.LoadModel("Models/Nanosuit/nanosuit.obj");
 	plane.LoadModel("Models/plane/plane.obj");
 	cube.LoadModel("Models/CubeBlue/CubeBlue.obj");
 
@@ -411,6 +411,7 @@ bool Core::Initialize()
 	debugDepthShader = Shader("Shaders/debugQuad.vert", "Shaders/debugQuad.frag");
 	shader = Shader("Shaders/shader.vert", "Shaders/shader.frag");
 	shadowShader = Shader("Shaders/shadowShader.vert", "Shaders/shadowShader.frag");
+	skyboxShader = Shader("Shaders/skyboxShader.vert", "Shaders/skyboxShader.frag");
 
 	//SetLights();
 
@@ -495,6 +496,8 @@ void Core::Render()
 	glClearColor(0.1f, 0.1f, 0.1f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
+	glCullFace(GL_FRONT);
+
 	//Render depth map
 	glm::mat4 lightProjection, lightView;
 	glm::mat4 lightSpaceMatrix;
@@ -511,17 +514,18 @@ void Core::Render()
 	DrawScene(depthShader);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	glCullFace(GL_BACK);
 
 	//Render the scene normally
 	glViewport(0, 0, 1280, 720);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*debugDepthShader.UseProgram();
+	debugDepthShader.UseProgram();
 	debugDepthShader.SetFloat("near_plane", near_plane);
 	debugDepthShader.SetFloat("far_plane", far_plane);
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
-	renderQuad();*/
+	//renderQuad();
 
 	shadowShader.UseProgram();
 	shadowShader.SetMat4("view", camera.view);
@@ -567,6 +571,13 @@ void Core::DrawScene(Shader shader)
 	cubeTransform.CalculateWorldMatrix();
 	shader.SetMat4("model", cubeTransform.worldMatrix);
 	cube.Draw(shader);
+
+	Transform nanosuitTransform;
+	nanosuitTransform.translate = glm::vec3(10.0f, 0.0f, 15.0f);
+	nanosuitTransform.rotate = glm::vec3(0.0f, -90.0f, 0.0f);
+	nanosuitTransform.CalculateWorldMatrix();
+	shader.SetMat4("model", nanosuitTransform.worldMatrix);
+	nanosuit.Draw(shader);
 
 	// cubes
 	/*glm::mat4 modelT;

@@ -163,6 +163,7 @@
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Transform.h" />
@@ -185,6 +186,7 @@
     </ClCompile>
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -204,6 +206,8 @@
     <None Include="Shaders\shader.vert" />
     <None Include="Shaders\shadowShader.frag" />
     <None Include="Shaders\shadowShader.vert" />
+    <None Include="Shaders\skyboxShader.frag" />
+    <None Include="Shaders\skyboxShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="texture.jpg" />

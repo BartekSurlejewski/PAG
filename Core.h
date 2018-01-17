@@ -21,14 +21,10 @@ public:
 	Camera* GetCamera() { return &camera; }
 	TwBar* bar;
 	TwBar* barLighting;
-	Model model, model2, plane, cube;
+	Model model, nanosuit, plane, cube;
 
 	Window window;
-	Shader shader;
-	Shader depthShader;
-	Shader debugDepthShader;
-	Shader shaderSphere;
-	Shader shadowShader;
+	Shader shader, depthShader, debugDepthShader, shaderSphere, shadowShader, skyboxShader;
 	Model modelSphere;
 	bool canMoveCamera;
 
