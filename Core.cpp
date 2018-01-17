@@ -16,9 +16,9 @@ Core* core = nullptr;
 float xOffset = 0.0f;
 float yOffset = 0.0f;
 
-bool directionalLightOn = false;
-bool pointLightOn = false;
-bool spotLightOn = false;
+bool directionalLightOn = true;
+bool pointLightOn = true;
+bool spotLightOn = true;
 
 int UnProject(float winX, float winY, float winZ, const glm::mat4& matViewProjection, const int viewport[4], float* objX, float* objY, float* objZ)
 {
@@ -272,6 +272,33 @@ Core::Core()
 
 }
 
+void Core::renderQuad()
+{
+	if (quadVAO == 0)
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
 bool Core::Initialize()
 {
 	if (!glfwInit())
@@ -289,7 +316,7 @@ bool Core::Initialize()
 	window.Initialization(1280, 720);
 
 	camera.SetAspectRatio(1280.f / 720.f);
-	camera.SetPosition(glm::vec3(0.0f, 2.0f, 30.0f));
+	camera.SetPosition(glm::vec3(15.0f, 20.0f, -2.0f));
 
 	glfwMakeContextCurrent(window.GetWindow());
 	glfwSetFramebufferSizeCallback(window.GetWindow(), framebuffer_size_callback);
@@ -313,42 +340,6 @@ bool Core::Initialize()
 	bar = TwNewBar("Hierarchy");
 	TwWindowSize(1280, 720);
 	TwDefine(" Hierarchy position='1060 20' ");
-
-	SetLights();
-
-	barLighting = TwNewBar("Lighting");
-	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &directionalLight->GetDirection(), "Group=Directional");
-
-	TwAddVarRW(barLighting, "Const", TW_TYPE_FLOAT, &pointLight->GetAttenuation().x, "Group=Point");
-	TwAddVarRW(barLighting, "Linear", TW_TYPE_FLOAT, &pointLight->GetAttenuation().y, "Group=Point step=0.001 min=0");
-	TwAddVarRW(barLighting, "Quadratic", TW_TYPE_FLOAT, &pointLight->GetAttenuation().z, "Group=Point step=0.0001 min=0");
-
-	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &spotLight->GetDirection(), "Group=Spot");
-	TwAddVarRW(barLighting, "Position", TW_TYPE_DIR3F, &spotLight->GetPosition(), "Group=Spot");
-
-	// set inital viewport
-	glViewport(0, 0, 1280, 720);
-
-	//Depth map FBO configuration
-	glGenFramebuffers(1, &depthMapFBO);
-
-	//Create depth texture
-	unsigned int depthMap;
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	//Attach depth texture as FBO's depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 
 	// INITIALIZE MESH DATA
 	float vertices[] = {
@@ -413,10 +404,71 @@ bool Core::Initialize()
 	model.LoadModel("Models/Hierarchia.3ds");
 	model2.LoadModel("Models/Nanosuit/nanosuit.obj");
 	plane.LoadModel("Models/plane/plane.obj");
+	cube.LoadModel("Models/CubeBlue/CubeBlue.obj");
 
+	depthShader = Shader("Shaders/depthShader.vert", "Shaders/depthShader.frag");
+	debugDepthShader = Shader("Shaders/debugQuad.vert", "Shaders/debugQuad.frag");
 	shader = Shader("Shaders/shader.vert", "Shaders/shader.frag");
+	shadowShader = Shader("Shaders/shadowShader.vert", "Shaders/shadowShader.frag");
+
+	//SetLights();
+
+	/*barLighting = TwNewBar("Lighting");
+	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &directionalLight->GetDirection(), "Group=Directional");
+
+	TwAddVarRW(barLighting, "Const", TW_TYPE_FLOAT, &pointLight->GetAttenuation().x, "Group=Point");
+	TwAddVarRW(barLighting, "Linear", TW_TYPE_FLOAT, &pointLight->GetAttenuation().y, "Group=Point step=0.001 min=0");
+	TwAddVarRW(barLighting, "Quadratic", TW_TYPE_FLOAT, &pointLight->GetAttenuation().z, "Group=Point step=0.0001 min=0");
+
+	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &spotLight->GetDirection(), "Group=Spot");
+	TwAddVarRW(barLighting, "Position", TW_TYPE_DIR3F, &spotLight->GetPosition(), "Group=Spot");*/
+
+	// set inital viewport
+	//glViewport(0, 0, 1280, 720);
+
+	//Depth map FBO configuration
+	glGenFramebuffers(1, &depthMapFBO);
+
+	//Create depth texture
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//Attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	shadowShader.UseProgram();
+	shadowShader.SetInt("diffuseTeture", 0);
+	shadowShader.SetInt("shadowMap", 1);
+	debugDepthShader.UseProgram();
+	debugDepthShader.SetInt("depthMap", 0);
+
+	//directionalLightPos = glm::vec3(6.0f, 10.0f, -2.0f);
+	directionalLightPos = glm::vec3(15.0f, 20.0f, -2.0f);
 
 	return true;
+}
+
+void Core::processInputCore(GLFWwindow* pWindow, float delta)
+{
+	if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE))
+	{
+		glfwSetWindowShouldClose(pWindow, true);
+	}
+	if (glfwGetKey(pWindow, GLFW_KEY_T) == GLFW_PRESS)
+	{
+		directionalLightOn = !directionalLightOn;
+	}
+
+	camera.processInput(pWindow, delta);
 }
 
 void Core::Update()
@@ -438,77 +490,101 @@ void Core::Update()
 	glfwTerminate();
 }
 
-void Core::processInputCore(GLFWwindow* pWindow, float delta)
-{
-	if (glfwGetKey(pWindow, GLFW_KEY_ESCAPE))
-	{
-		glfwSetWindowShouldClose(pWindow, true);
-	}
-	if (glfwGetKey(pWindow, GLFW_KEY_T) == GLFW_PRESS)
-	{
-		directionalLightOn = !directionalLightOn;
-	}
-
-	camera.processInput(pWindow, delta);
-}
-
 void Core::Render()
 {
-	glClearColor(0.8f, 0.7f, 0.5f, 1);
+	glClearColor(0.1f, 0.1f, 0.1f, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+
+	//Render depth map
+
+	glm::mat4 lightProjection, lightView;
+	glm::mat4 lightSpaceMatrix;
+	float near_plane = -200.0f, far_plane = 200.0f;
+	lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, near_plane, far_plane);
+	lightView = glm::lookAt(directionalLightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	lightSpaceMatrix = lightProjection * lightView;
+	depthShader.UseProgram();
+	depthShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	DrawScene(depthShader);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//Render the scene normally
+	glViewport(0, 0, 1280, 720);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	shader.UseProgram();
+	debugDepthShader.UseProgram();
+	debugDepthShader.SetFloat("near_plane", near_plane);
+	debugDepthShader.SetFloat("far_plane", far_plane);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	//renderQuad();
 
-	shader.SetMat4("view", camera.view);
-	shader.SetMat4("projection", camera.projection);
-	shader.SetVec3("cameraPosition", camera.GetPosition());
-
-	////Render to depth map
-	//glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	//glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	//	glClear(GL_DEPTH_BUFFER_BIT);
-	DrawScene();
+	shadowShader.UseProgram();
+	shadowShader.SetMat4("view", camera.view);
+	shadowShader.SetMat4("projection", camera.projection);
+	shadowShader.SetVec3("viewPos", camera.GetPosition());
+	shadowShader.SetVec3("directionalLightPos", directionalLightPos);
+	shadowShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	DrawScene(shader);
 
 	return;
 }
 
-void Core::DrawScene()
+void Core::DrawScene(Shader shader)
 {
 	/******SCENE RENDERRING******/
 
 	Material modelMaterial;
 	modelMaterial.specFactor = 10;
-	modelMaterial.SetSimple(shader);
+	//modelMaterial.SetSimple(shader);
 
-	Transform lightTransform;
-	directionalLight->Draw(lightTransform, &shader);
+	//Transform lightTransform;
+	//lightTransform.translate = directionalLightPos;
 
-	glm::vec3 pos;
-	pos.y = 0.0f;
-	pos.x = 20 * sinf(glfwGetTime() * 0.5);
-	pos.z = 20 * cosf(glfwGetTime() * 0.5);
-	pointLight->SetPosition(pos);
-	pointLight->Draw(lightTransform, &shader);
+	////directionalLight->SetDirection(directionalLightPos);
+	//directionalLight->SetDirection(glm::vec3(0.0f));
+	//directionalLight->Draw(lightTransform, &shader);
 
-	spotLight->Draw(lightTransform, &shader);
+	////pointLight->SetPosition(lightTransform.translate);
+	////pointLight->Draw(lightTransform, &shader);
 
-	for (int x = 0; x <= 2; x++)
-	{
-		for (int z = 1; z <= 3; z++)
-		{
-			Transform trans;
-			trans.translate = glm::vec3((float)x * 10, 0.0f, (float)z * -10);
-			trans.CalculateWorldMatrix();
+	////spotLight->Draw(lightTransform, &shader);
 
-			shader.SetMat4("model", trans.worldMatrix);
-			model2.Draw(shader);
-		}
-	}
+	Transform cubeTransform;
+	cubeTransform.translate = glm::vec3(-6.0f, 1.0f, 0.0f);
+	cubeTransform.CalculateWorldMatrix();
+	shader.SetMat4("model", cubeTransform.worldMatrix);
+	cube.Draw(shader);
+
+	// cubes
+	/*glm::mat4 modelT;
+	modelT = glm::mat4();
+	modelT = glm::translate(modelT, glm::vec3(0.0f, 1.5f, 0.0));
+	modelT = glm::scale(modelT, glm::vec3(0.5f));
+	shader.SetMat4("model", modelT);
+	renderCube();
+	modelT = glm::mat4();
+	modelT = glm::translate(modelT, glm::vec3(2.0f, 0.0f, 1.0));
+	modelT = glm::scale(modelT, glm::vec3(0.5f));
+	shader.SetMat4("model", modelT);
+	renderCube();
+	modelT = glm::mat4();
+	modelT = glm::translate(modelT, glm::vec3(-1.0f, 0.0f, 2.0));
+	modelT = glm::rotate(modelT, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+	modelT = glm::scale(modelT, glm::vec3(0.25));
+	shader.SetMat4("model", modelT);
+	renderCube();
 
 	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 	modelMaterial.specFactor = 64;
 	modelMaterial.SetSimple(shader);
-	model.DrawAsGraph(shader);
+	model.DrawAsGraph(shader);*/
 
 	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 	modelMaterial.specFactor = 20;
@@ -522,6 +598,80 @@ void Core::DrawScene()
 	plane.Draw(shader);
 
 	TwDraw();
+}
+
+// renderCube() renders a 1x1 3D cube in NDC.
+// -------------------------------------------------
+
+void Core::renderCube()
+{
+	// initialize (if necessary)
+	if (cubeVAO == 0)
+	{
+		float vertices[] = {
+			// back face
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+			1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+			1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+			1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+			-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+																  // front face
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+			 1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+			-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+																// left face
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+			-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+																// right face
+			1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+			1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+			1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+			1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+			1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+			1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+																// bottom face
+			-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+			1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+			1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+			1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+			-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+																// top face
+			-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+			1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+			1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+			1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+																																																																						 -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+		};
+		glGenVertexArrays(1, &cubeVAO);
+		glGenBuffers(1, &cubeVBO);
+		// fill buffer
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		// link vertex attributes
+		glBindVertexArray(cubeVAO);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+	// render Cube
+	glBindVertexArray(cubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
 }
 
 void Core::SetLights()

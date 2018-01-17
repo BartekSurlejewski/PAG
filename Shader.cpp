@@ -30,6 +30,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 		// convert stream into string
 		vertexCode = vShaderStream.str();
 		fragmentCode = fShaderStream.str();
+		vertexCode += '\0';
+		fragmentCode += '\0';
 	}
 	catch (std::ifstream::failure e)
 	{

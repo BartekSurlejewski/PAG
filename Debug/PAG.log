@@ -1,5 +1,4 @@
-﻿  Shader.cpp
-  Core.cpp
+﻿  Core.cpp
 c:\opengl\include\glfw\glfw3.h(789): warning C4099: 'GLFWwindow': type name first seen using 'class' now seen using 'struct'
   c:\users\20400\onedrive\dokumenty\github\pag\pag\camera.h(3): note: see declaration of 'GLFWwindow'
 c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(92): warning C4101: 'projectionMatrix': unreferenced local variable
@@ -11,14 +10,6 @@ c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(249): warning C4244: '
 c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(250): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(252): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(253): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(426): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(488): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(489): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-  Generating Code...
-  Compiling...
-  PAG.cpp
-c:\opengl\include\glfw\glfw3.h(789): warning C4099: 'GLFWwindow': type name first seen using 'class' now seen using 'struct'
-  c:\users\20400\onedrive\dokumenty\github\pag\pag\camera.h(3): note: see declaration of 'GLFWwindow'
-  Generating Code...
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(478): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.exe
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.pdb (Partial PDB)

@@ -196,8 +196,14 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="debugQuad.frag" />
+    <None Include="debugQuad.vert" />
+    <None Include="depthShader.frag" />
+    <None Include="depthShader.vert" />
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />
+    <None Include="Shaders\shadowShader.frag" />
+    <None Include="Shaders\shadowShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="texture.jpg" />
