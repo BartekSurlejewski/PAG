@@ -7,8 +7,8 @@
 #include "PointLight.h"
 #include "SpotLight.h"
 
-#define SHADOW_WIDTH  1024
-#define SHADOW_HEIGHT  1024
+#define SHADOW_WIDTH  2048
+#define SHADOW_HEIGHT  2048
 
 
 Core* core = nullptr;
@@ -316,7 +316,7 @@ bool Core::Initialize()
 	window.Initialization(1280, 720);
 
 	camera.SetAspectRatio(1280.f / 720.f);
-	camera.SetPosition(glm::vec3(15.0f, 20.0f, -2.0f));
+	camera.SetPosition(glm::vec3(5.0f, 10.0f, 40.0f));
 
 	glfwMakeContextCurrent(window.GetWindow());
 	glfwSetFramebufferSizeCallback(window.GetWindow(), framebuffer_size_callback);
@@ -398,6 +398,7 @@ bool Core::Initialize()
 	}
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 	std::vector<unsigned int> indices;
 
@@ -422,9 +423,6 @@ bool Core::Initialize()
 
 	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &spotLight->GetDirection(), "Group=Spot");
 	TwAddVarRW(barLighting, "Position", TW_TYPE_DIR3F, &spotLight->GetPosition(), "Group=Spot");*/
-
-	// set inital viewport
-	//glViewport(0, 0, 1280, 720);
 
 	//Depth map FBO configuration
 	glGenFramebuffers(1, &depthMapFBO);
@@ -451,7 +449,6 @@ bool Core::Initialize()
 	debugDepthShader.UseProgram();
 	debugDepthShader.SetInt("depthMap", 0);
 
-	//directionalLightPos = glm::vec3(6.0f, 10.0f, -2.0f);
 	directionalLightPos = glm::vec3(15.0f, 20.0f, -2.0f);
 
 	return true;
@@ -496,11 +493,10 @@ void Core::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
 	//Render depth map
-
 	glm::mat4 lightProjection, lightView;
 	glm::mat4 lightSpaceMatrix;
 	float near_plane = -200.0f, far_plane = 200.0f;
-	lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, near_plane, far_plane);
+	lightProjection = glm::ortho(-200.0f, 200.0f, 200.0f, -200.0f, near_plane, far_plane);
 	lightView = glm::lookAt(directionalLightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	lightSpaceMatrix = lightProjection * lightView;
 	depthShader.UseProgram();
@@ -512,16 +508,17 @@ void Core::Render()
 	DrawScene(depthShader);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+
 	//Render the scene normally
 	glViewport(0, 0, 1280, 720);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	debugDepthShader.UseProgram();
+	/*debugDepthShader.UseProgram();
 	debugDepthShader.SetFloat("near_plane", near_plane);
 	debugDepthShader.SetFloat("far_plane", far_plane);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
-	//renderQuad();
+	renderQuad();*/
 
 	shadowShader.UseProgram();
 	shadowShader.SetMat4("view", camera.view);
@@ -557,7 +554,13 @@ void Core::DrawScene(Shader shader)
 	////spotLight->Draw(lightTransform, &shader);
 
 	Transform cubeTransform;
-	cubeTransform.translate = glm::vec3(-6.0f, 1.0f, 0.0f);
+	cubeTransform.translate = glm::vec3(-6.0f, -10.0f, 0.0f);
+	cubeTransform.CalculateWorldMatrix();
+	shader.SetMat4("model", cubeTransform.worldMatrix);
+	cube.Draw(shader);
+
+	cubeTransform.translate = glm::vec3(15.0f, 5.0f, 0.0f);
+	cubeTransform.scale = glm::vec3(0.5f);
 	cubeTransform.CalculateWorldMatrix();
 	shader.SetMat4("model", cubeTransform.worldMatrix);
 	cube.Draw(shader);
