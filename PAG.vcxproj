@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -152,6 +152,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bloom.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="DirectionalLight.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bloom.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
@@ -204,6 +206,9 @@
     <None Include="depthShader.vert" />
     <None Include="Shaders\bloomShader.frag" />
     <None Include="Shaders\bloomShader.vert" />
+    <None Include="Shaders\blurShader.frag" />
+    <None Include="Shaders\finalBloomShader.frag" />
+    <None Include="Shaders\finalBloomShader.vert" />
     <None Include="Shaders\reflection.frag" />
     <None Include="Shaders\reflection.vert" />
     <None Include="Shaders\shader.frag" />

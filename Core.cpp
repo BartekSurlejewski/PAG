@@ -162,82 +162,82 @@ void mouse_button(GLFWwindow* window, int button, int x, int y)
 	{
 		glm::vec3 cameraPos = core->GetCamera()->GetPosition();
 
-		Ray ray;
-		ray.origin = cameraPos;
+		//Ray ray;
+		//ray.origin = cameraPos;
 
-		// intersect test
-		std::vector<SceneNode*> sceneNodes;
-		make_list(core->model.graph.rootNode, sceneNodes);
+		//// intersect test
+		//std::vector<SceneNode*> sceneNodes;
+		//make_list(core->model.graph.rootNode, sceneNodes);
 
-		bool bIntersect = false;
+		//bool bIntersect = false;
 
-		TwRemoveAllVars(core->bar);
+		//TwRemoveAllVars(core->bar);
 
-		for (int i = 0; i < sceneNodes.size(); ++i)
-		{
-			if (sceneNodes[i]->nodeType != Type_Model)
-			{
-				continue;
-			}
-			ModelNode* modelNode = (ModelNode*)(sceneNodes[i]);
+		//for (int i = 0; i < sceneNodes.size(); ++i)
+		//{
+		//	if (sceneNodes[i]->nodeType != Type_Model)
+		//	{
+		//		continue;
+		//	}
+		//	ModelNode* modelNode = (ModelNode*)(sceneNodes[i]);
 
-			const glm::mat4& world = modelNode->combinedXForm;
+		//	const glm::mat4& world = modelNode->combinedXForm;
 
-			glm::vec4 boundaryMin = glm::vec4(modelNode->boundingBoxMin, 1.0f);
-			glm::vec4 boundaryMax = glm::vec4(modelNode->boundingBoxMax, 1.0f);
-			boundaryMin = world * boundaryMin;
-			boundaryMax = world * boundaryMax;
+		//	glm::vec4 boundaryMin = glm::vec4(modelNode->boundingBoxMin, 1.0f);
+		//	glm::vec4 boundaryMax = glm::vec4(modelNode->boundingBoxMax, 1.0f);
+		//	boundaryMin = world * boundaryMin;
+		//	boundaryMax = world * boundaryMax;
 
-			double xPos, yPos;
-			glfwGetCursorPos(window, &xPos, &yPos);
+		//	double xPos, yPos;
+		//	glfwGetCursorPos(window, &xPos, &yPos);
 
-			glm::vec3 direction = UnprojectFromScreen((int)xPos, (int)yPos, world);
-			ray.direction = direction;
+		//	glm::vec3 direction = UnprojectFromScreen((int)xPos, (int)yPos, world);
+		//	ray.direction = direction;
 
-			// Sphere
-			glm::vec4 sphereCenter = glm::vec4(modelNode->boundingSphereCenter, 1.0f);
+		//	// Sphere
+		//	glm::vec4 sphereCenter = glm::vec4(modelNode->boundingSphereCenter, 1.0f);
 
-			glm::mat4 matScaleUnitSphere;
-			matScaleUnitSphere = glm::scale(matScaleUnitSphere, glm::vec3(modelNode->boundingSphereRadius));
+		//	glm::mat4 matScaleUnitSphere;
+		//	matScaleUnitSphere = glm::scale(matScaleUnitSphere, glm::vec3(modelNode->boundingSphereRadius));
 
-			sphereCenter = world * sphereCenter;
-			float sphereCenterSqared = powf(modelNode->boundingSphereRadius, 2.5f);
+		//	sphereCenter = world * sphereCenter;
+		//	float sphereCenterSqared = powf(modelNode->boundingSphereRadius, 2.5f);
 
-			glm::vec3 sphereCenterXYZ = glm::vec3(sphereCenter.x, sphereCenter.y, sphereCenter.z);
+		//	glm::vec3 sphereCenterXYZ = glm::vec3(sphereCenter.x, sphereCenter.y, sphereCenter.z);
 
-			float dist = 0;
-			//bIntersect = glm::intersectRaySphere(ray.origin, ray.direction, sphereCenterXYZ, sphereCenterSqared, dist);
+		//	float dist = 0;
+		//	//bIntersect = glm::intersectRaySphere(ray.origin, ray.direction, sphereCenterXYZ, sphereCenterSqared, dist);
 
-			if (bIntersect == true)
-			{
-				char ch[32];
-				sprintf_s(ch, "intersect %d\n", i);
-				OutputDebugStringA(ch);
+		//	if (bIntersect == true)
+		//	{
+		//		char ch[32];
+		//		sprintf_s(ch, "intersect %d\n", i);
+		//		OutputDebugStringA(ch);
 
-				ModelNode* pIntersectedNode = modelNode;
-				pIntersectedNode->color = glm::vec4(5.0f, 0.0f, 0.0f, 1.0f);
+		//		ModelNode* pIntersectedNode = modelNode;
+		//		pIntersectedNode->color = glm::vec4(5.0f, 0.0f, 0.0f, 1.0f);
 
-				char buf[64];
-				sprintf_s(buf, "Group=%s step=0.1", pIntersectedNode->name.c_str());
+		//		char buf[64];
+		//		sprintf_s(buf, "Group=%s step=0.1", pIntersectedNode->name.c_str());
 
-				TwAddVarRW(core->bar, std::string("translate x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.x, buf);
-				TwAddVarRW(core->bar, std::string("translate y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.y, buf);
-				TwAddVarRW(core->bar, std::string("translate z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.z, buf);
+		//		TwAddVarRW(core->bar, std::string("translate x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.x, buf);
+		//		TwAddVarRW(core->bar, std::string("translate y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.y, buf);
+		//		TwAddVarRW(core->bar, std::string("translate z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.translate.z, buf);
 
-				TwAddVarRW(core->bar, std::string("scale x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.x, buf);
-				TwAddVarRW(core->bar, std::string("scale y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.y, buf);
-				TwAddVarRW(core->bar, std::string("scale z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.z, buf);
+		//		TwAddVarRW(core->bar, std::string("scale x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.x, buf);
+		//		TwAddVarRW(core->bar, std::string("scale y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.y, buf);
+		//		TwAddVarRW(core->bar, std::string("scale z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.scale.z, buf);
 
-				TwAddVarRW(core->bar, std::string("rotate x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.x, buf);
-				TwAddVarRW(core->bar, std::string("rotate y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.y, buf);
-				TwAddVarRW(core->bar, std::string("rotate z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.z, buf);
+		//		TwAddVarRW(core->bar, std::string("rotate x").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.x, buf);
+		//		TwAddVarRW(core->bar, std::string("rotate y").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.y, buf);
+		//		TwAddVarRW(core->bar, std::string("rotate z").c_str(), TW_TYPE_FLOAT, &pIntersectedNode->xForm.rotate.z, buf);
 
-			}
-			else
-			{
-				modelNode->color = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
-			}
-		}
+		//	}
+		//	else
+		//	{
+		//		modelNode->color = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+		//	}
+		//}
 	}
 }
 
@@ -332,6 +332,9 @@ bool Core::Initialize()
 	{
 		return false;
 	}
+
+	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };	// Tell opengl about rendering to multiple color buffers
+	glDrawBuffers(2, attachments);
 
 
 	// Init AntTweakBar
@@ -458,35 +461,31 @@ bool Core::Initialize()
 
 	std::vector<unsigned int> indices;
 
-	//model.LoadModel("Models/Hierarchia.3ds");
 	nanosuit.LoadModel("Models/Nanosuit/nanosuit.obj");
-	//plane.LoadModel("Models/plane/plane.obj");
-	//cube.LoadModel("Models/CubeBlue/CubeBlue.obj");
+	cube.LoadModel("Models/CubeBlue/CubeBlue.obj");
+	cubeGreen.LoadModel("Models/CubeGreen/CubeGreen.obj");
+	cubeRed.LoadModel("Models/CubeRed/CubeRed.obj");
 	cabin.LoadModel("Models/WoodenCabin/WoodenCabinObj.obj");
 	table.LoadModel("Models/Table/table.obj");
 	crystal.LoadModel("Models/Crystal/Crystal.obj");
 
 	depthShader = Shader("Shaders/depthShader.vert", "Shaders/depthShader.frag");
 	debugDepthShader = Shader("Shaders/debugQuad.vert", "Shaders/debugQuad.frag");
-	shader = Shader("Shaders/shader.vert", "Shaders/shader.frag");
+	bloomShader = Shader("Shader/bloomShader.vert", "Shaders/bloomShader.frag");
+	finalBloomShader = Shader("Shader/finalBloomShader.vert", "Shaders/finalBloomShader.frag");
+	blurShader = Shader("Shader/bloomShader.vert", "Shaders/blurShader.frag");
 	shadowShader = Shader("Shaders/shadowShader.vert", "Shaders/shadowShader.frag");
 	skyboxShader = Shader("Shaders/skyboxShader.vert", "Shaders/skyboxShader.frag");
 	reflectionShader = Shader("Shaders/reflection.vert", "Shaders/reflection.frag");
-
-	//SetLights();
 
 	barLighting = TwNewBar("Lighting");
 	TwAddVarRW(barLighting, std::string("translate x").c_str(), TW_TYPE_FLOAT, &directionalLightPos.x, "");
 	TwAddVarRW(barLighting, std::string("translate y").c_str(), TW_TYPE_FLOAT, &directionalLightPos.y, "");
 	TwAddVarRW(barLighting, std::string("translate z").c_str(), TW_TYPE_FLOAT, &directionalLightPos.z, "");
 
-	/*TwAddVarRW(barLighting, "Const", TW_TYPE_FLOAT, &pointLight->GetAttenuation().x, "Group=Point");
-	TwAddVarRW(barLighting, "Linear", TW_TYPE_FLOAT, &pointLight->GetAttenuation().y, "Group=Point step=0.001 min=0");
-	TwAddVarRW(barLighting, "Quadratic", TW_TYPE_FLOAT, &pointLight->GetAttenuation().z, "Group=Point step=0.0001 min=0");
-
-	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &spotLight->GetDirection(), "Group=Spot");
-	TwAddVarRW(barLighting, "Position", TW_TYPE_DIR3F, &spotLight->GetPosition(), "Group=Spot");*/
-
+	// Set up floating point framebiffer to render scene to (BLOOM)
+	bloom.Initialize();
+	
 	//Depth map FBO configuration
 	glGenFramebuffers(1, &depthMapFBO);
 
@@ -510,7 +509,7 @@ bool Core::Initialize()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	shadowShader.UseProgram();
-	shadowShader.SetInt("diffuseTeture", 0);
+	shadowShader.SetInt("diffuseTexture", 0);
 	shadowShader.SetInt("shadowMap", 1);
 
 	skyboxShader.UseProgram();
@@ -521,6 +520,16 @@ bool Core::Initialize()
 
 	debugDepthShader.UseProgram();
 	debugDepthShader.SetInt("depthMap", 0);
+
+	blurShader.UseProgram();
+	blurShader.SetInt("image", 0);
+
+	bloomShader.UseProgram();
+	bloomShader.SetInt("diffuseTexture", 0);
+
+	finalBloomShader.UseProgram();
+	finalBloomShader.SetInt("scene", 0);
+	finalBloomShader.SetInt("bloomBlur", 0);
 
 	directionalLightPos = glm::vec3(50.0f, 15.0f, -2.0f);
 
@@ -637,18 +646,6 @@ void Core::DrawScene(Shader shader)
 	modelMaterial.specFactor = 10;
 	modelMaterial.SetSimple(shader);
 
-	/*Transform lightTransform;
-	lightTransform.translate = directionalLightPos;
-
-	directionalLight->SetDirection(directionalLightPos);
-	directionalLight->SetDirection(glm::vec3(0.0f));
-	directionalLight->Draw(lightTransform, &shader);
-
-	pointLight->SetPosition(lightTransform.translate);
-	pointLight->Draw(lightTransform, &shader);
-
-	spotLight->Draw(lightTransform, &shader);*/
-
 	Transform nanosuitTransform;
 	nanosuitTransform.translate = glm::vec3(0.0f, 0.0f, -25.0f);
 	nanosuitTransform.rotate = glm::vec3(0.0f, -60.0f, 0.0f);
@@ -656,29 +653,9 @@ void Core::DrawScene(Shader shader)
 	shader.SetMat4("model", nanosuitTransform.worldMatrix);
 	nanosuit.Draw(shader);
 
-	Transform cubeTransform;
-	cubeTransform.translate = glm::vec3(-6.0f, -10.0f, 0.0f);
-	cubeTransform.CalculateWorldMatrix();
-	shader.SetMat4("model", cubeTransform.worldMatrix);
-	//cube.Draw(shader);
-
-	cubeTransform.translate = glm::vec3(directionalLightPos);
-	cubeTransform.scale = glm::vec3(0.5f);
-	cubeTransform.CalculateWorldMatrix();
-	shader.SetMat4("model", cubeTransform.worldMatrix);
-	//cube.Draw(shader);
-
 	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 	modelMaterial.specFactor = 20;
 	modelMaterial.SetSimple(shader);
-
-	Transform trans;
-	trans.translate = glm::vec3(0.0f, -10.0f, 0.0f);
-	trans.scale = glm::vec3(0.3f);
-	trans.CalculateWorldMatrix();
-
-	shader.SetMat4("model", trans.worldMatrix);
-	//plane.Draw(shader);
 
 	Transform cabinTrans;
 	cabinTrans.translate = glm::vec3(20.0f, -11.0f, -5.0f);
@@ -695,14 +672,27 @@ void Core::DrawScene(Shader shader)
 	shader.SetMat4("model", tableTrans.worldMatrix);
 	table.Draw(shader);
 
-	tableTrans.translate.y += 6.5f;
+	tableTrans.translate.y += 4.5f;
 	tableTrans.translate.x -= 10;
-	tableTrans.scale = glm::vec3(1.5f);
+	tableTrans.scale = glm::vec3(0.3f);
 	tableTrans.CalculateWorldMatrix();
 	shader.SetMat4("model", tableTrans.worldMatrix);
-	crystal.Draw(shader);
+	cubeRed.Draw(shader);
 
-	/*******REFLECTION********/
+	tableTrans.translate.y += 5.9f;
+	tableTrans.rotate = glm::vec3(0.0f, 30.0f, 0.0f);
+	tableTrans.CalculateWorldMatrix();
+	shader.SetMat4("model", tableTrans.worldMatrix);
+	cubeGreen.Draw(shader);
+
+	tableTrans.translate.x += 15;
+	tableTrans.translate.y += -5.5f;
+	tableTrans.rotate = glm::vec3(0.0f, 30.0f, 0.0f);
+	tableTrans.CalculateWorldMatrix();
+	shader.SetMat4("model", tableTrans.worldMatrix);
+	cube.Draw(shader);
+
+	/*******REFLECTION / REFRACTION********/
 	reflectionShader.UseProgram();
 	reflectionShader.SetVec3("viewPos", camera.GetPosition());
 	reflectionShader.SetBool("R", R);

@@ -1,67 +1,47 @@
-#version 400 core	
-out vec4 FragColor;
+#version 400 core
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
-in vec2 TexCoords;
-in vec4 FragPos;
+in vec3 FragPos;
 in vec3 Normal;
+in vec2 TexCoords;
 
-uniform sampler2D diffuseTexture;
-
-struct PointLight
-{
-	vec3 posWorld;
-	vec3 att;	// Const / Linear / Quadratic
-
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;	
+struct Light {
+    vec3 Position;
+    vec3 Color;
 };
 
-uniform Material material;
-uniform DirectionalLight dirLight;
-uniform PointLight pointLight;
-uniform SpotLight spotLight;
-
-
-uniform vec3 g_vCameraPos;
-
-vec3 CalcPointLight(PointLight light, vec3 N, vec3 V, vec3 posWorld)
-{
-	vec3 L = ( light.posWorld - posWorld );	// vector from PositionW to light pos
-
-	float dist = length(L);
-	float att = 1.0 / (light.att.x + light.att.y * dist + light.att.z * dist * dist);
-
-	// normalize L
-	L /= dist;
-
-	float NdotL = max( dot(N, L), 0.0f );
-
-	vec3 H = normalize( L + V );
-	float specFactor = pow(max(dot(N, H), 0.0), material.specFactor);
-
-	// Combined results
-	vec3 finalAmbient = light.ambient * vec3( texture(material.texture_diffuse, TexCoords) );
-	vec3 finalDiffuse = light.diffuse * NdotL * vec3( texture(material.texture_diffuse, TexCoords) );
-	vec3 finalSpecular = light.specular * specFactor;
-
-	finalAmbient *= att;
-	finalDiffuse *= att;
-	finalSpecular *= att;
-
-	return finalAmbient + finalSpecular + finalDiffuse;
-	//return finalAmbient;
-}
+uniform Light lights[3];
+uniform sampler2D diffuseTexture;
+uniform vec3 viewPos;
 
 void main()
-{
-	vec3 N = normalize( Normal );
-	vec3 V = normalize(  g_vCameraPos - FragPos.xyz );
-	vec3 PosW = FragPos.xyz;
-
-	// Calculate point light
-	result += CalcPointLight(pointLight, N, V, PosW);
-
-	// output
-    FragColor =  vec4(result, 1.0f) * color;
+{           
+    vec3 color = texture(diffuseTexture, TexCoords).rgb;
+    vec3 normal = normalize(Normal);
+    // ambient
+    vec3 ambient = 0.0 * color;
+    // lighting
+    vec3 lighting = vec3(0.0);
+    vec3 viewDir = normalize(viewPos - FragPos);
+    for(int i = 0; i < 3; i++)
+    {
+        // diffuse
+        vec3 lightDir = normalize(lights[i].Position - FragPos);
+        float diff = max(dot(lightDir, normal), 0.0);
+        vec3 result = lights[i].Color * diff * color;      
+        // attenuation (use quadratic as we have gamma correction)
+        float distance = length(FragPos - lights[i].Position);
+        result *= 1.0 / (distance * distance);
+        lighting += result;
+                
+    }
+    vec3 result = ambient + lighting;
+    // check whether result is higher than some threshold, if so, output as bloom threshold color
+    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0)
+        BrightColor = vec4(result, 1.0);
+    else
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+    FragColor = vec4(result, 1.0);
 }

@@ -6,6 +6,7 @@
 #include "Transform.h"
 #include "Model.h"
 #include "Skybox.h"
+#include "Bloom.h"
 #include <AntTweakBar/AntTweakBar.h>
 
 class DirectionalLight;
@@ -22,10 +23,11 @@ public:
 	Camera* GetCamera() { return &camera; }
 	TwBar* bar;
 	TwBar* barLighting;
-	Model model, nanosuit, plane, cube, cabin, table, crystal;
+	Model model, nanosuit, plane, cube, cubeGreen, cubeRed, cabin, table, crystal;
 
 	Window window;
-	Shader shader, depthShader, debugDepthShader, shaderSphere, shadowShader, skyboxShader, reflectionShader;
+	Shader shader, depthShader, debugDepthShader, shaderSphere, shadowShader, skyboxShader,
+			reflectionShader, bloomShader, finalBloomShader, blurShader;
 	Model modelSphere;
 	bool canMoveCamera;
 
@@ -44,6 +46,7 @@ private:
 
 	Camera camera;
 	Skybox skybox;
+	Bloom bloom;
 
 	glm::vec3 directionalLightPos;
 
