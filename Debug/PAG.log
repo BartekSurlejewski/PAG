@@ -9,7 +9,7 @@ c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(250): warning C4244: '
 c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(251): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(253): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(254): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(561): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(669): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(556): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\20400\onedrive\dokumenty\github\pag\pag\core.cpp(674): warning C4305: 'argument': truncation from 'double' to 'float'
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.exe
   PAG.vcxproj -> C:\Users\20400\OneDrive\Dokumenty\GitHub\PAG\Debug\PAG.pdb (Partial PDB)

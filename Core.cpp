@@ -316,7 +316,7 @@ bool Core::Initialize()
 	window.Initialization(1280, 720);
 
 	camera.SetAspectRatio(1280.f / 720.f);
-	camera.SetPosition(glm::vec3(5.0f, 10.0f, 40.0f));
+	camera.SetPosition(glm::vec3(18.0f, 13.0f, -50.0f));
 
 	glfwMakeContextCurrent(window.GetWindow());
 	glfwSetFramebufferSizeCallback(window.GetWindow(), framebuffer_size_callback);
@@ -462,18 +462,16 @@ bool Core::Initialize()
 	std::vector<unsigned int> indices;
 
 	nanosuit.LoadModel("Models/Nanosuit/nanosuit.obj");
-	cube.LoadModel("Models/CubeBlue/CubeBlue.obj");
-	cubeGreen.LoadModel("Models/CubeGreen/CubeGreen.obj");
-	cubeRed.LoadModel("Models/CubeRed/CubeRed.obj");
 	cabin.LoadModel("Models/WoodenCabin/WoodenCabinObj.obj");
 	table.LoadModel("Models/Table/table.obj");
 	crystal.LoadModel("Models/Crystal/Crystal.obj");
+	cube.LoadModel("Models/CubeBlue/CubeBlue.obj");
 
 	depthShader = Shader("Shaders/depthShader.vert", "Shaders/depthShader.frag");
 	debugDepthShader = Shader("Shaders/debugQuad.vert", "Shaders/debugQuad.frag");
-	bloomShader = Shader("Shader/bloomShader.vert", "Shaders/bloomShader.frag");
-	finalBloomShader = Shader("Shader/finalBloomShader.vert", "Shaders/finalBloomShader.frag");
-	blurShader = Shader("Shader/bloomShader.vert", "Shaders/blurShader.frag");
+	finalBloomShader = Shader("Shaders/finalBloomShader.vert", "Shaders/finalBloomShader.frag");
+	blurShader = Shader("Shaders/blurShader.vert", "Shaders/blurShader.frag");
+	lightShader = Shader("Shaders/bloomShader.vert", "Shaders/lightShader.frag");
 	shadowShader = Shader("Shaders/shadowShader.vert", "Shaders/shadowShader.frag");
 	skyboxShader = Shader("Shaders/skyboxShader.vert", "Shaders/skyboxShader.frag");
 	reflectionShader = Shader("Shaders/reflection.vert", "Shaders/reflection.frag");
@@ -484,7 +482,7 @@ bool Core::Initialize()
 	TwAddVarRW(barLighting, std::string("translate z").c_str(), TW_TYPE_FLOAT, &directionalLightPos.z, "");
 
 	// Set up floating point framebiffer to render scene to (BLOOM)
-	bloom.Initialize();
+	bloom.Initialize(shadowShader, blurShader, lightShader, finalBloomShader);
 	
 	//Depth map FBO configuration
 	glGenFramebuffers(1, &depthMapFBO);
@@ -524,14 +522,11 @@ bool Core::Initialize()
 	blurShader.UseProgram();
 	blurShader.SetInt("image", 0);
 
-	bloomShader.UseProgram();
-	bloomShader.SetInt("diffuseTexture", 0);
-
 	finalBloomShader.UseProgram();
 	finalBloomShader.SetInt("scene", 0);
-	finalBloomShader.SetInt("bloomBlur", 0);
+	finalBloomShader.SetInt("bloomBlur", 1);
 
-	directionalLightPos = glm::vec3(50.0f, 15.0f, -2.0f);
+	directionalLightPos = glm::vec3(-80.0f, 15.0f, -2.0f);
 
 	return true;
 }
@@ -583,8 +578,8 @@ void Core::Render()
 	//Render depth map
 	glm::mat4 lightProjection, lightView;
 	glm::mat4 lightSpaceMatrix;
-	float near_plane = 1.0f, far_plane = 200.0f;
-	lightProjection = glm::ortho(-200.0f, 200.0f, 200.0f, -200.0f, near_plane, far_plane);
+	float near_plane = 1.0f, far_plane = 500.0f;
+	lightProjection = glm::ortho(-500.0f, 500.0f, 500.0f, -500.0f, near_plane, far_plane);
 	lightView = glm::lookAt(directionalLightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	lightSpaceMatrix = lightProjection * lightView;
 	depthShader.UseProgram();
@@ -602,6 +597,9 @@ void Core::Render()
 	glViewport(0, 0, 1280, 720);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glBindFramebuffer(GL_FRAMEBUFFER, bloom.hdrFBO);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	debugDepthShader.UseProgram();
 	debugDepthShader.SetFloat("near_plane", near_plane);
 	debugDepthShader.SetFloat("far_plane", far_plane);
@@ -614,16 +612,6 @@ void Core::Render()
 	reflectionShader.SetMat4("view", camera.view);
 	reflectionShader.SetMat4("projection", camera.projection);
 
-	shadowShader.UseProgram();
-	shadowShader.SetMat4("view", camera.view);
-	shadowShader.SetMat4("projection", camera.projection);
-	shadowShader.SetVec3("viewPos", camera.GetPosition());
-	shadowShader.SetVec3("directionalLightPos", directionalLightPos);
-	shadowShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	DrawScene(shadowShader);
-
 	/***SKYBOX DRAWING***/
 	glDepthFunc(GL_EQUAL);
 	skyboxShader.UseProgram();
@@ -635,6 +623,23 @@ void Core::Render()
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);
+
+	shadowShader.UseProgram();
+	shadowShader.SetMat4("view", camera.view);
+	shadowShader.SetMat4("projection", camera.projection);
+	shadowShader.SetVec3("viewPos", camera.GetPosition());
+	shadowShader.SetVec3("directionalLightPos", directionalLightPos);
+	shadowShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+	for (unsigned int i = 0; i < lightPositions.size(); i++)
+	{
+		shadowShader.SetVec3("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
+		shadowShader.SetVec3("lights[" + std::to_string(i) + "].Color", lightColors[i]);
+	}
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	DrawScene(shadowShader);
 	return;
 }
 
@@ -672,25 +677,29 @@ void Core::DrawScene(Shader shader)
 	shader.SetMat4("model", tableTrans.worldMatrix);
 	table.Draw(shader);
 
-	tableTrans.translate.y += 4.5f;
-	tableTrans.translate.x -= 10;
-	tableTrans.scale = glm::vec3(0.3f);
-	tableTrans.CalculateWorldMatrix();
-	shader.SetMat4("model", tableTrans.worldMatrix);
-	cubeRed.Draw(shader);
+	lightShader.UseProgram();
 
-	tableTrans.translate.y += 5.9f;
+	tableTrans.translate = lightPositions[0];
+	tableTrans.scale = glm::vec3(0.2f);
+	tableTrans.CalculateWorldMatrix();
+	lightShader.SetMat4("model", tableTrans.worldMatrix);
+	lightShader.SetVec3("lightColor", lightColors[0]);
+	cube.Draw(lightShader);
+
+	tableTrans.translate = lightPositions[1];
 	tableTrans.rotate = glm::vec3(0.0f, 30.0f, 0.0f);
 	tableTrans.CalculateWorldMatrix();
-	shader.SetMat4("model", tableTrans.worldMatrix);
-	cubeGreen.Draw(shader);
+	lightShader.SetMat4("model", tableTrans.worldMatrix);
+	lightShader.SetVec3("lightColor", lightColors[1]);
+	cube.Draw(lightShader);
 
-	tableTrans.translate.x += 15;
-	tableTrans.translate.y += -5.5f;
+	tableTrans.translate = lightPositions[2];
 	tableTrans.rotate = glm::vec3(0.0f, 30.0f, 0.0f);
 	tableTrans.CalculateWorldMatrix();
-	shader.SetMat4("model", tableTrans.worldMatrix);
-	cube.Draw(shader);
+	lightShader.SetMat4("model", tableTrans.worldMatrix);
+	lightShader.SetVec3("lightColor", lightColors[2]);
+	cube.Draw(lightShader);
+
 
 	/*******REFLECTION / REFRACTION********/
 	reflectionShader.UseProgram();
@@ -705,6 +714,11 @@ void Core::DrawScene(Shader shader)
 	reflectionShader.SetMat4("model", nanosuitTransform.worldMatrix);
 	nanosuit.Draw(reflectionShader);
 	//////////////////////////////
+
+	lightShader.UseProgram();
+	lightShader.SetMat4("projection", camera.projection);
+	lightShader.SetMat4("view", camera.view);
+	bloom.Render();
 
 	TwDraw();
 }

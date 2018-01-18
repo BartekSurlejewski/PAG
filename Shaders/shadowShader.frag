@@ -1,10 +1,18 @@
 #version 400 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 in vec4 FragPosLightSpace;
+
+struct Light {
+    vec3 Position;
+    vec3 Color;
+};
+
+uniform Light lights[3];
 
 uniform sampler2D diffuseTexture;
 uniform sampler2D shadowMap;
@@ -23,8 +31,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
-	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    
+	float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);
+	    
 	float shadow = 0.0;
 
 	if(!(projCoords.z > 1.0))
@@ -64,7 +72,26 @@ void main()
     vec3 specular = spec * lightColor;    
     // calculate shadow
     float shadow = ShadowCalculation(FragPosLightSpace, normal, lightDir);                      
-    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;    
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;   
+
+	for(int i = 0; i < 3; i++)
+    {
+        // diffuse
+        vec3 lightDirSpot = normalize(lights[i].Position - FragPos);
+        float diff = max(dot(lightDirSpot, normal), 0.0);
+        vec3 result = lights[i].Color * diff * color;      
+        // attenuation (use quadratic as we have gamma correction)
+        float distance = length(FragPos - lights[i].Position);
+        result *= 1.0 / (distance * distance);
+        lighting += result;           
+    } 
+
+// check whether result is higher than some threshold, if so, output as bloom threshold color
+    float brightness = dot(lighting, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0)
+        BrightColor = vec4(lighting, 1.0);
+    else
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
     
     FragColor = vec4(lighting, 1.0);
 }

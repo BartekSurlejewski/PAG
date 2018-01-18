@@ -27,9 +27,12 @@ public:
 
 	Window window;
 	Shader shader, depthShader, debugDepthShader, shaderSphere, shadowShader, skyboxShader,
-			reflectionShader, bloomShader, finalBloomShader, blurShader;
+			reflectionShader, finalBloomShader, blurShader, lightShader;
 	Model modelSphere;
 	bool canMoveCamera;
+	bool bloomOn = true;
+
+	float exposure = 1.0f;
 
 	DirectionalLight* directionalLight = nullptr;
 	PointLight* pointLight = nullptr;
@@ -58,4 +61,14 @@ private:
 	unsigned int cubeVAO = 0;
 	unsigned int cubeVBO = 0;
 	unsigned int skyboxVAO, skyboxVBO;
+
+	std::vector<glm::vec3> lightPositions = { glm::vec3(5.0f, 9.5f, -62.0f),
+		glm::vec3(15.0f, 10.0f, -62.0f),
+		glm::vec3(25.5f, 10.0, -62.0f)
+	};
+
+	std::vector<glm::vec3> lightColors = { glm::vec3(2.0f, 2.0f, 2.0f),
+		glm::vec3(50.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 1.5f)
+	};
 };

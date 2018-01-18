@@ -69,6 +69,9 @@
     <ClInclude Include="Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Bloom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -116,15 +119,15 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Bloom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="depthShader.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="depthShader.frag">
@@ -158,6 +161,21 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\bloomShader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\blurShader.frag" />
+    <None Include="Shaders\finalBloomShader.frag" />
+    <None Include="Shaders\finalBloomShader.vert" />
+    <None Include="Shaders\blurShader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\debugQuad.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\depthShader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\lightShader.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
