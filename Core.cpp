@@ -339,10 +339,7 @@ bool Core::Initialize()
 
 	// Init AntTweakBar
 	TwInit(TW_OPENGL_CORE, nullptr);
-
-	bar = TwNewBar("Hierarchy");
 	TwWindowSize(1280, 720);
-	TwDefine(" Hierarchy position='1060 20' ");
 
 	// INITIALIZE MESH DATA
 	float vertices[] = {
@@ -476,10 +473,12 @@ bool Core::Initialize()
 	skyboxShader = Shader("Shaders/skyboxShader.vert", "Shaders/skyboxShader.frag");
 	reflectionShader = Shader("Shaders/reflection.vert", "Shaders/reflection.frag");
 
-	barLighting = TwNewBar("Lighting");
+	barLighting = TwNewBar("Controls");
 	TwAddVarRW(barLighting, std::string("translate x").c_str(), TW_TYPE_FLOAT, &directionalLightPos.x, "");
 	TwAddVarRW(barLighting, std::string("translate y").c_str(), TW_TYPE_FLOAT, &directionalLightPos.y, "");
 	TwAddVarRW(barLighting, std::string("translate z").c_str(), TW_TYPE_FLOAT, &directionalLightPos.z, "");
+	TwAddVarRW(barLighting, std::string("Bloom").c_str(), TW_TYPE_BOOL16, &bloomOn, "");
+	TwAddVarRW(barLighting, std::string("Reflection/Refraction").c_str(), TW_TYPE_BOOL16, &R, "");
 
 	// Set up floating point framebiffer to render scene to (BLOOM)
 	bloom.Initialize(shadowShader, blurShader, lightShader, finalBloomShader);
@@ -524,7 +523,7 @@ bool Core::Initialize()
 
 	finalBloomShader.UseProgram();
 	finalBloomShader.SetInt("scene", 0);
-	finalBloomShader.SetInt("bloomBlur", 1);
+	finalBloomShader.SetInt("bloomBlur", bloomOn);
 
 	directionalLightPos = glm::vec3(-80.0f, 15.0f, -2.0f);
 
@@ -540,10 +539,6 @@ void Core::processInputCore(GLFWwindow* pWindow, float delta)
 	if (glfwGetKey(pWindow, GLFW_KEY_T) == GLFW_PRESS)
 	{
 		directionalLightOn = !directionalLightOn;
-	}
-	if (glfwGetKey(pWindow, GLFW_KEY_R) == GLFW_PRESS)
-	{
-		R = !R;
 	}
 
 	camera.processInput(pWindow, delta);
@@ -695,6 +690,7 @@ void Core::DrawScene(Shader shader)
 
 	tableTrans.translate = lightPositions[2];
 	tableTrans.rotate = glm::vec3(0.0f, 30.0f, 0.0f);
+	tableTrans.scale = glm::vec3(0.0f);
 	tableTrans.CalculateWorldMatrix();
 	lightShader.SetMat4("model", tableTrans.worldMatrix);
 	lightShader.SetVec3("lightColor", lightColors[2]);
@@ -714,6 +710,9 @@ void Core::DrawScene(Shader shader)
 	reflectionShader.SetMat4("model", nanosuitTransform.worldMatrix);
 	nanosuit.Draw(reflectionShader);
 	//////////////////////////////
+
+	finalBloomShader.UseProgram();
+	finalBloomShader.SetInt("bloomBlur", bloomOn);
 
 	lightShader.UseProgram();
 	lightShader.SetMat4("projection", camera.projection);

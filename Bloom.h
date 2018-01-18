@@ -22,8 +22,8 @@ public:
 	unsigned int pingpongFBO[2];
 	unsigned int pingpongBuffer[2];
 	std::vector<glm::vec3> lightPositions = { glm::vec3(5.0f, 9.5f, -62.0f),
-											glm::vec3(15.0f, 10.0f, -62.0f),
-											glm::vec3(25.5f, 10.0, -62.0f)
+											glm::vec3(25.0f, 10.0f, -62.0f),
+											glm::vec3(45.5f, 10.0, -62.0f)
 											};
 
 	std::vector<glm::vec3> lightColors = { glm::vec3(2.0f, 2.0f, 2.0f),
