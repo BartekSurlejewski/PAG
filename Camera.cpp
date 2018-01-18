@@ -78,5 +78,5 @@ void Camera::processInput(GLFWwindow* window, float dt)
 
 void Camera::UpdatePerspectiveMatrix()
 {
-	projection = glm::perspective(glm::radians(75.f), aspectRatio, 0.1f, 200.f);
+	projection = glm::perspective(glm::radians(75.f), aspectRatio, 0.1f, 500.f);
 }

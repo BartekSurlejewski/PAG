@@ -19,6 +19,7 @@ float yOffset = 0.0f;
 bool directionalLightOn = true;
 bool pointLightOn = true;
 bool spotLightOn = true;
+bool R = true; //Reflection / Refraction
 
 int UnProject(float winX, float winY, float winZ, const glm::mat4& matViewProjection, const int viewport[4], float* objX, float* objY, float* objZ)
 {
@@ -457,23 +458,29 @@ bool Core::Initialize()
 
 	std::vector<unsigned int> indices;
 
-	model.LoadModel("Models/Hierarchia.3ds");
+	//model.LoadModel("Models/Hierarchia.3ds");
 	nanosuit.LoadModel("Models/Nanosuit/nanosuit.obj");
-	plane.LoadModel("Models/plane/plane.obj");
-	cube.LoadModel("Models/CubeBlue/CubeBlue.obj");
+	//plane.LoadModel("Models/plane/plane.obj");
+	//cube.LoadModel("Models/CubeBlue/CubeBlue.obj");
+	cabin.LoadModel("Models/WoodenCabin/WoodenCabinObj.obj");
+	table.LoadModel("Models/Table/table.obj");
+	crystal.LoadModel("Models/Crystal/Crystal.obj");
 
 	depthShader = Shader("Shaders/depthShader.vert", "Shaders/depthShader.frag");
 	debugDepthShader = Shader("Shaders/debugQuad.vert", "Shaders/debugQuad.frag");
 	shader = Shader("Shaders/shader.vert", "Shaders/shader.frag");
 	shadowShader = Shader("Shaders/shadowShader.vert", "Shaders/shadowShader.frag");
 	skyboxShader = Shader("Shaders/skyboxShader.vert", "Shaders/skyboxShader.frag");
+	reflectionShader = Shader("Shaders/reflection.vert", "Shaders/reflection.frag");
 
 	//SetLights();
 
-	/*barLighting = TwNewBar("Lighting");
-	TwAddVarRW(barLighting, "Direction", TW_TYPE_DIR3F, &directionalLight->GetDirection(), "Group=Directional");
+	barLighting = TwNewBar("Lighting");
+	TwAddVarRW(barLighting, std::string("translate x").c_str(), TW_TYPE_FLOAT, &directionalLightPos.x, "");
+	TwAddVarRW(barLighting, std::string("translate y").c_str(), TW_TYPE_FLOAT, &directionalLightPos.y, "");
+	TwAddVarRW(barLighting, std::string("translate z").c_str(), TW_TYPE_FLOAT, &directionalLightPos.z, "");
 
-	TwAddVarRW(barLighting, "Const", TW_TYPE_FLOAT, &pointLight->GetAttenuation().x, "Group=Point");
+	/*TwAddVarRW(barLighting, "Const", TW_TYPE_FLOAT, &pointLight->GetAttenuation().x, "Group=Point");
 	TwAddVarRW(barLighting, "Linear", TW_TYPE_FLOAT, &pointLight->GetAttenuation().y, "Group=Point step=0.001 min=0");
 	TwAddVarRW(barLighting, "Quadratic", TW_TYPE_FLOAT, &pointLight->GetAttenuation().z, "Group=Point step=0.0001 min=0");
 
@@ -509,10 +516,13 @@ bool Core::Initialize()
 	skyboxShader.UseProgram();
 	skyboxShader.SetInt("skybox", 0);
 
+	reflectionShader.UseProgram();
+	reflectionShader.SetInt("skybox", 0);
+
 	debugDepthShader.UseProgram();
 	debugDepthShader.SetInt("depthMap", 0);
 
-	directionalLightPos = glm::vec3(15.0f, 20.0f, -2.0f);
+	directionalLightPos = glm::vec3(50.0f, 15.0f, -2.0f);
 
 	return true;
 }
@@ -526,6 +536,10 @@ void Core::processInputCore(GLFWwindow* pWindow, float delta)
 	if (glfwGetKey(pWindow, GLFW_KEY_T) == GLFW_PRESS)
 	{
 		directionalLightOn = !directionalLightOn;
+	}
+	if (glfwGetKey(pWindow, GLFW_KEY_R) == GLFW_PRESS)
+	{
+		R = !R;
 	}
 
 	camera.processInput(pWindow, delta);
@@ -560,8 +574,8 @@ void Core::Render()
 	//Render depth map
 	glm::mat4 lightProjection, lightView;
 	glm::mat4 lightSpaceMatrix;
-	float near_plane = -70.0f, far_plane = 70.0f;
-	lightProjection = glm::ortho(-70.0f, 70.0f, 70.0f, -70.0f, near_plane, far_plane);
+	float near_plane = 1.0f, far_plane = 200.0f;
+	lightProjection = glm::ortho(-200.0f, 200.0f, 200.0f, -200.0f, near_plane, far_plane);
 	lightView = glm::lookAt(directionalLightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	lightSpaceMatrix = lightProjection * lightView;
 	depthShader.UseProgram();
@@ -579,22 +593,17 @@ void Core::Render()
 	glViewport(0, 0, 1280, 720);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/***SKYBOX DRAWING***/
-	glDepthMask(GL_FALSE);
-	skyboxShader.UseProgram();
-	skyboxShader.SetMat4("view", glm::mat4(glm::mat3(camera.view)));
-	skyboxShader.SetMat4("projection", camera.projection);
-	glBindVertexArray(skyboxVAO);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.cubemapTexture);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glDepthMask(GL_TRUE);
-
 	debugDepthShader.UseProgram();
 	debugDepthShader.SetFloat("near_plane", near_plane);
 	debugDepthShader.SetFloat("far_plane", far_plane);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//renderQuad();
+
+	reflectionShader.UseProgram();
+	reflectionShader.SetMat4("view", camera.view);
+	reflectionShader.SetMat4("projection", camera.projection);
 
 	shadowShader.UseProgram();
 	shadowShader.SetMat4("view", camera.view);
@@ -604,8 +613,19 @@ void Core::Render()
 	shadowShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
-	DrawScene(shader);
+	DrawScene(shadowShader);
 
+	/***SKYBOX DRAWING***/
+	glDepthFunc(GL_EQUAL);
+	skyboxShader.UseProgram();
+	skyboxShader.SetMat4("view", glm::mat4(glm::mat3(camera.view)));
+	skyboxShader.SetMat4("projection", camera.projection);
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.cubemapTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glDepthFunc(GL_LESS);
 	return;
 }
 
@@ -615,62 +635,38 @@ void Core::DrawScene(Shader shader)
 
 	Material modelMaterial;
 	modelMaterial.specFactor = 10;
-	//modelMaterial.SetSimple(shader);
+	modelMaterial.SetSimple(shader);
 
-	//Transform lightTransform;
-	//lightTransform.translate = directionalLightPos;
+	/*Transform lightTransform;
+	lightTransform.translate = directionalLightPos;
 
-	////directionalLight->SetDirection(directionalLightPos);
-	//directionalLight->SetDirection(glm::vec3(0.0f));
-	//directionalLight->Draw(lightTransform, &shader);
+	directionalLight->SetDirection(directionalLightPos);
+	directionalLight->SetDirection(glm::vec3(0.0f));
+	directionalLight->Draw(lightTransform, &shader);
 
-	////pointLight->SetPosition(lightTransform.translate);
-	////pointLight->Draw(lightTransform, &shader);
+	pointLight->SetPosition(lightTransform.translate);
+	pointLight->Draw(lightTransform, &shader);
 
-	////spotLight->Draw(lightTransform, &shader);
+	spotLight->Draw(lightTransform, &shader);*/
+
+	Transform nanosuitTransform;
+	nanosuitTransform.translate = glm::vec3(0.0f, 0.0f, -25.0f);
+	nanosuitTransform.rotate = glm::vec3(0.0f, -60.0f, 0.0f);
+	nanosuitTransform.CalculateWorldMatrix();
+	shader.SetMat4("model", nanosuitTransform.worldMatrix);
+	nanosuit.Draw(shader);
 
 	Transform cubeTransform;
 	cubeTransform.translate = glm::vec3(-6.0f, -10.0f, 0.0f);
 	cubeTransform.CalculateWorldMatrix();
 	shader.SetMat4("model", cubeTransform.worldMatrix);
-	cube.Draw(shader);
+	//cube.Draw(shader);
 
-	cubeTransform.translate = glm::vec3(15.0f, 5.0f, 0.0f);
+	cubeTransform.translate = glm::vec3(directionalLightPos);
 	cubeTransform.scale = glm::vec3(0.5f);
 	cubeTransform.CalculateWorldMatrix();
 	shader.SetMat4("model", cubeTransform.worldMatrix);
-	cube.Draw(shader);
-
-	Transform nanosuitTransform;
-	nanosuitTransform.translate = glm::vec3(10.0f, 0.0f, 15.0f);
-	nanosuitTransform.rotate = glm::vec3(0.0f, -90.0f, 0.0f);
-	nanosuitTransform.CalculateWorldMatrix();
-	shader.SetMat4("model", nanosuitTransform.worldMatrix);
-	nanosuit.Draw(shader);
-
-	// cubes
-	/*glm::mat4 modelT;
-	modelT = glm::mat4();
-	modelT = glm::translate(modelT, glm::vec3(0.0f, 1.5f, 0.0));
-	modelT = glm::scale(modelT, glm::vec3(0.5f));
-	shader.SetMat4("model", modelT);
-	renderCube();
-	modelT = glm::mat4();
-	modelT = glm::translate(modelT, glm::vec3(2.0f, 0.0f, 1.0));
-	modelT = glm::scale(modelT, glm::vec3(0.5f));
-	shader.SetMat4("model", modelT);
-	renderCube();
-	modelT = glm::mat4();
-	modelT = glm::translate(modelT, glm::vec3(-1.0f, 0.0f, 2.0));
-	modelT = glm::rotate(modelT, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-	modelT = glm::scale(modelT, glm::vec3(0.25));
-	shader.SetMat4("model", modelT);
-	renderCube();
-
-	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
-	modelMaterial.specFactor = 64;
-	modelMaterial.SetSimple(shader);
-	model.DrawAsGraph(shader);*/
+	//cube.Draw(shader);
 
 	modelMaterial.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 	modelMaterial.specFactor = 20;
@@ -678,10 +674,47 @@ void Core::DrawScene(Shader shader)
 
 	Transform trans;
 	trans.translate = glm::vec3(0.0f, -10.0f, 0.0f);
+	trans.scale = glm::vec3(0.3f);
 	trans.CalculateWorldMatrix();
 
 	shader.SetMat4("model", trans.worldMatrix);
-	plane.Draw(shader);
+	//plane.Draw(shader);
+
+	Transform cabinTrans;
+	cabinTrans.translate = glm::vec3(20.0f, -11.0f, -5.0f);
+	cabinTrans.scale = glm::vec3(2.0f);
+	cabinTrans.CalculateWorldMatrix();
+	shader.SetMat4("model", cabinTrans.worldMatrix);
+	cabin.Draw(shader);
+
+	Transform tableTrans;
+	tableTrans.translate = glm::vec3(20.0f, 5.0f, -62.0f);
+	tableTrans.scale = glm::vec3(0.2);
+	tableTrans.rotate = glm::vec3(0.0f, 180.0f, 0.0f);
+	tableTrans.CalculateWorldMatrix();
+	shader.SetMat4("model", tableTrans.worldMatrix);
+	table.Draw(shader);
+
+	tableTrans.translate.y += 6.5f;
+	tableTrans.translate.x -= 10;
+	tableTrans.scale = glm::vec3(1.5f);
+	tableTrans.CalculateWorldMatrix();
+	shader.SetMat4("model", tableTrans.worldMatrix);
+	crystal.Draw(shader);
+
+	/*******REFLECTION********/
+	reflectionShader.UseProgram();
+	reflectionShader.SetVec3("viewPos", camera.GetPosition());
+	reflectionShader.SetBool("R", R);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.cubemapTexture);
+
+	nanosuitTransform.translate = glm::vec3(10.0f, 0.0f, 15.0f);
+	nanosuitTransform.rotate = glm::vec3(0.0f, -90.0f, 0.0f);
+	nanosuitTransform.CalculateWorldMatrix();
+	reflectionShader.SetMat4("model", nanosuitTransform.worldMatrix);
+	nanosuit.Draw(reflectionShader);
+	//////////////////////////////
 
 	TwDraw();
 }

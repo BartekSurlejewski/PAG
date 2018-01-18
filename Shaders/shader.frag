@@ -6,7 +6,7 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec4 FragPosLightSpace;
 
-uniform sampler2D diffuseTeture;
+uniform sampler2D diffuseTexture;
 uniform sampler2D shadowMap;
 
 uniform vec4 color;

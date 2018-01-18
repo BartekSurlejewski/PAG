@@ -148,6 +148,18 @@
     <None Include="Shaders\skyboxShader.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\reflection.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\reflection.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\bloomShader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\bloomShader.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="texture.jpg">

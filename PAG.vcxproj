@@ -202,6 +202,10 @@
     <None Include="debugQuad.vert" />
     <None Include="depthShader.frag" />
     <None Include="depthShader.vert" />
+    <None Include="Shaders\bloomShader.frag" />
+    <None Include="Shaders\bloomShader.vert" />
+    <None Include="Shaders\reflection.frag" />
+    <None Include="Shaders\reflection.vert" />
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />
     <None Include="Shaders\shadowShader.frag" />

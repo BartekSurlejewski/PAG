@@ -23,7 +23,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
-	float bias = max(0.001 * (1.0 - dot(normal, lightDir)), 0.0001);
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
     
 	float shadow = 0.0;
 
